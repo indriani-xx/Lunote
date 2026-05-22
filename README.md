@@ -1,17 +1,53 @@
-# indri_notes
+<div align="center">
 
-A new Flutter project.
+# 🌙 Lunote
 
-## Getting Started
+### Simple To-Do List & Notes App
 
-This project is a starting point for a Flutter application.
+Lunote adalah aplikasi sederhana yang menggabungkan fitur  
+**To-Do List** dan **Notes** dalam satu tempat.
 
-A few resources to get you started if this is your first Flutter project:
+Dirancang dengan tampilan minimalis untuk membantu pengguna  
+mencatat ide, mengatur tugas, dan meningkatkan produktivitas sehari-hari ✨
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+<br>
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<!-- <img src="preview.png" width="250"/> -->
+
+<br><br>
+
+![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
+![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
+![Status](https://img.shields.io/badge/Status-Development-blueviolet?style=for-the-badge)
+
+</div>
+
+---
+
+## ✨ Features
+
+- 📝 Create and manage notes
+- ✅ Add daily task lists
+- 📌 Mark tasks as completed
+- 🎨 Minimalist and modern UI
+- 📱 Simple and user-friendly interface
+
+---
+
+## 🛠️ Technologies Used
+
+| Technology | Description |
+|---|---|
+| Flutter | UI Framework |
+| Dart | Programming Language |
+| Material Design | UI Design System |
+
+---
+
+## 🚀 Installation
+
+```bash
+git clone https://github.com/username/lunote.git
+cd lunote
+flutter pub get
+flutter run
