@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../model/todo.dart';
+import '../../model/todo.dart';
+import '../core/app_color.dart';
 
 class TodoListView extends StatelessWidget {
   const TodoListView({super.key, required this.todos, required this.onTodoTap});
