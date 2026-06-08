@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'pages/notes_page.dart';
+import 'pages/todo_list_page.dart';
 import 'core/app_color.dart';
 
 class HomePage extends StatefulWidget {
@@ -12,12 +13,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _pages = [
-    NotesPage(),
-    Center(
-      child: Text('Halaman Todo'),
-    ), // Nanti ini bisa kamu ganti ke TodoPage()
-  ];
+  static const List<Widget> _pages = [NotesPage(), TodoPage()];
 
   void _onItemTapped(int index) {
     setState(() {

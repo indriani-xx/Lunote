@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AppColor {
-  // Mencegah class ini di-instansiasi, di gembok biar tidak bisa dibuat objeknya biar gak buang" memori
+  // Mencegah class ini di-instansiasi, di gembok biar tidak bisa dibuat objeknya
+  // biar gak buang" memori
   AppColor._();
 
   static const Color background = Color(
@@ -22,4 +23,7 @@ class AppColor {
   static const Color delete = Color(
     0xFFE63946,
   ); // Warna merah soft untuk tombol hapus
+  static const Color primaryLight = Color(
+    0xFFE8EFE3,
+  ); // Warna hijau muda biar variatif
 }
