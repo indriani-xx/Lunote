@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../model/todo.dart';
 import '../core/app_color.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class TodoPage extends StatefulWidget {
   const TodoPage({super.key});
@@ -70,15 +71,6 @@ class _TodoPageState extends State<TodoPage> {
     );
   }
 
-  List<DateTime> _getDateList() {
-    final now = DateTime.now();
-    List<DateTime> dates = [];
-    for (int i = -3; i <= 3; i++) {
-      dates.add(now.add(Duration(days: i)));
-    }
-    return dates;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,10 +88,10 @@ class _TodoPageState extends State<TodoPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 30),
-              const Text(
+              const SizedBox(height: 40),
+              Text(
                 'Halo!',
-                style: TextStyle(
+                style: GoogleFonts.manrope(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: AppColor.text,
@@ -107,11 +99,34 @@ class _TodoPageState extends State<TodoPage> {
               ),
               Text(
                 'Punya rencana menarik?',
-                style: TextStyle(
+                style: GoogleFonts.inter(
                   fontSize: 16,
                   color: AppColor.text.withOpacity(0.7),
                 ),
               ),
+
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.only(right: 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}",
+                      style: GoogleFonts.manrope(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: _pickdate,
+                      icon: const Icon(Icons.calendar_month),
+                      color: AppColor.text,
+                    ),
+                  ],
+                ),
+              ),
+
               const SizedBox(height: 20),
 
               // DATE PICKER HORIZONTAL
@@ -173,75 +188,104 @@ class _TodoPageState extends State<TodoPage> {
     );
   }
 
+  List<DateTime> _getDateList() {
+    List<DateTime> dates = [];
+    for (int i = -2; i <= 2; i++) {
+      dates.add(selectedDate.add(Duration(days: i)));
+    }
+    return dates;
+  }
+
+  Future<void> _pickdate() async {
+    final pickeddate = await showDatePicker(
+      // tunggu user memilih tanggal baru muncul DatePicker
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (pickeddate != null) {
+      setState(() {
+        selectedDate = pickeddate;
+      });
+    }
+  }
+
   // DATE PICKER WIDGET
   Widget _buildDatePicker() {
     final dates = _getDateList();
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: dates.map((date) {
-            final isSelected =
-                date.day == selectedDate.day &&
-                date.month == selectedDate.month;
-            final dayName = [
-              'Sen',
-              'Sel',
-              'Rab',
-              'Kam',
-              'Jum',
-              'Sab',
-              'Min',
-            ][date.weekday - 1];
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minWidth: constraints.maxWidth),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: dates.map((date) {
+                final isSelected =
+                    date.day == selectedDate.day &&
+                    date.month == selectedDate.month;
+                final dayName = [
+                  'Sen',
+                  'Sel',
+                  'Rab',
+                  'Kam',
+                  'Jum',
+                  'Sab',
+                  'Min',
+                ][date.weekday - 1];
 
-            return GestureDetector(
-              onTap: () {
-                setState(() {
-                  selectedDate = date;
-                });
-              },
-              child: Container(
-                margin: const EdgeInsets.only(right: 12),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColor.primary
-                      : const Color(0xFFE2E8E4),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      dayName,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: isSelected
-                            ? Colors.white
-                            : AppColor.text.withOpacity(0.6),
-                      ),
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      selectedDate = date;
+                    });
+                  },
+                  child: Container(
+                    width: 68,
+                    height: 80,
+                    margin: const EdgeInsets.only(right: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColor.primary
+                          : const Color(0xFFE2E8E4),
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      date.day.toString(),
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: isSelected ? Colors.white : AppColor.text,
-                      ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          dayName,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: isSelected
+                                ? Colors.white
+                                : AppColor.text.withOpacity(0.6),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          date.day.toString(),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected ? Colors.white : AppColor.text,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -260,7 +304,7 @@ class _TodoPageState extends State<TodoPage> {
               });
             },
             child: Container(
-              width: 24,
+              width: 44,
               height: 24,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,

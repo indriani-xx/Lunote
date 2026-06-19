@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/app_color.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class NotesPage extends StatefulWidget {
   const NotesPage({super.key});
@@ -10,6 +11,7 @@ class NotesPage extends StatefulWidget {
 
 class _NotesPageState extends State<NotesPage> {
   final List<String> _notes = [];
+  late DateTime selectedDate = DateTime.now();
 
   void _addNote() {
     final TextEditingController controller = TextEditingController();
@@ -81,38 +83,184 @@ class _NotesPageState extends State<NotesPage> {
     });
   }
 
+  List<DateTime> _getDateList() {
+    List<DateTime> dates = [];
+    for (int i = -2; i <= 2; i++) {
+      dates.add(selectedDate.add(Duration(days: i)));
+    }
+    return dates;
+  }
+
+  Future<void> _pickdate() async {
+    final pickeddate = await showDatePicker(
+      // tunggu user memilih tanggal baru muncul DatePicker
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (pickeddate != null) {
+      setState(() {
+        selectedDate = pickeddate;
+      });
+    }
+  }
+
+  Widget _buildDatePicker() {
+    final dates = _getDateList();
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minWidth: constraints.maxWidth),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: dates.map((date) {
+                final isSelected =
+                    date.day == selectedDate.day &&
+                    date.month == selectedDate.month;
+                final dayName = [
+                  'Sen',
+                  'Sel',
+                  'Rab',
+                  'Kam',
+                  'Jum',
+                  'Sab',
+                  'Min',
+                ][date.weekday - 1];
+
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      selectedDate = date;
+                    });
+                  },
+                  child: Container(
+                    width: 68,
+                    height: 80,
+                    margin: const EdgeInsets.only(right: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColor.primary
+                          : const Color(0xFFE2E8E4),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          dayName,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: isSelected
+                                ? Colors.white
+                                : AppColor.text.withOpacity(0.6),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          date.day.toString(),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected ? Colors.white : AppColor.text,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.background, // Menggunakan AppColor
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Judul Aplikasi
-            const Padding(
-              padding: EdgeInsets.only(left: 20, top: 30, bottom: 10),
-              child: Text(
-                'My Notes',
-                style: TextStyle(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 40),
+              // Header Judul Aplikasi
+              Text(
+                'Halo!',
+                style: GoogleFonts.manrope(
                   color: AppColor.text,
-                  fontSize: 28,
+                  fontSize: 32,
                   fontWeight: FontWeight.bold,
                   letterSpacing: -0.5,
                 ),
               ),
-            ),
 
-            // Daftar catatan
-            Expanded(
-              child: _notes.isEmpty
+              Text(
+                'Catat segala hal penting yang ingin kamu ingat!',
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  color: AppColor.text.withOpacity(0.7),
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.only(right: 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}",
+                      style: GoogleFonts.manrope(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: _pickdate,
+                      icon: const Icon(Icons.calendar_month),
+                      color: AppColor.text,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              _buildDatePicker(),
+              const SizedBox(height: 30),
+
+              const Text(
+                'Notes',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColor.text,
+                ),
+              ),
+              const SizedBox(height: 15),
+              // Daftar catatan
+              _notes.isEmpty
                   ? const Center(
-                      child: Text(
-                        'Belum ada catatan',
-                        style: TextStyle(color: AppColor.muted, fontSize: 16),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 30),
+                        child: Text(
+                          'Belum ada catatan',
+                          style: TextStyle(color: AppColor.muted, fontSize: 16),
+                        ),
                       ),
                     )
                   : ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 8,
@@ -160,8 +308,8 @@ class _NotesPageState extends State<NotesPage> {
                         );
                       },
                     ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
