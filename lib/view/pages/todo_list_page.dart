@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../Controller/todo_controller.dart';
 import '../../model/todo.dart';
 import '../core/app_color.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,25 +12,25 @@ class TodoPage extends StatefulWidget {
 }
 
 class _TodoPageState extends State<TodoPage> {
-  List<Todo> todos = [];
+  final TodoController _todoController = TodoController();
   late DateTime selectedDate = DateTime.now();
-  final TextEditingController _todoController = TextEditingController();
+  final TextEditingController _todoControllerInput = TextEditingController();
 
   @override
   void dispose() {
-    _todoController.dispose();
+    _todoControllerInput.dispose();
     super.dispose();
   }
 
   void _showAddTodoDialog() {
-    _todoController.clear();
+    _todoControllerInput.clear();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Tambah Todo Baru'),
         backgroundColor: AppColor.background,
         content: TextField(
-          controller: _todoController,
+          controller: _todoControllerInput,
           decoration: InputDecoration(
             hintText: 'Masukkan tugas baru...',
             hintStyle: TextStyle(color: AppColor.text.withOpacity(0.5)),
@@ -54,9 +55,9 @@ class _TodoPageState extends State<TodoPage> {
           ),
           TextButton(
             onPressed: () {
-              if (_todoController.text.isNotEmpty) {
+              if (_todoControllerInput.text.trim().isNotEmpty) {
                 setState(() {
-                  todos.add(Todo(title: _todoController.text, isDone: false));
+                  _todoController.addTodo(_todoControllerInput.text.trim());
                 });
                 Navigator.pop(context);
               }
@@ -127,25 +128,20 @@ class _TodoPageState extends State<TodoPage> {
                 ),
               ),
 
-              const SizedBox(height: 20),
-
-              // DATE PICKER HORIZONTAL
+              const SizedBox(height: 10),
               _buildDatePicker(),
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
               // 3. MAIN BANNER CARD
               Container(
-                height: 160,
+                height: 140,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: AppColor.primary,
                   borderRadius: BorderRadius.circular(24),
                 ),
-                child: const Center(
-                  child: Icon(Icons.gps_fixed, color: Colors.white30, size: 80),
-                ),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
               //TODO LIST SECTION
               const Text(
@@ -159,7 +155,7 @@ class _TodoPageState extends State<TodoPage> {
               const SizedBox(height: 15),
 
               // Dynamic List of Todos
-              todos.isEmpty
+              _todoController.todos.isEmpty
                   ? Center(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 30),
@@ -175,7 +171,7 @@ class _TodoPageState extends State<TodoPage> {
                   : ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: todos.length,
+                      itemCount: _todoController.todos.length,
                       itemBuilder: (context, index) {
                         return _buildTodoItem(index);
                       },
@@ -217,37 +213,37 @@ class _TodoPageState extends State<TodoPage> {
     final dates = _getDateList();
     return LayoutBuilder(
       builder: (context, constraints) {
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minWidth: constraints.maxWidth),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: dates.map((date) {
-                final isSelected =
-                    date.day == selectedDate.day &&
-                    date.month == selectedDate.month;
-                final dayName = [
-                  'Sen',
-                  'Sel',
-                  'Rab',
-                  'Kam',
-                  'Jum',
-                  'Sab',
-                  'Min',
-                ][date.weekday - 1];
+        return Row(
+          children: dates.asMap().entries.map((entry) {
+            final index = entry.key;
+            final date = entry.value;
+            final isSelected =
+                date.day == selectedDate.day &&
+                date.month == selectedDate.month;
+            final dayName = [
+              'Sen',
+              'Sel',
+              'Rab',
+              'Kam',
+              'Jum',
+              'Sab',
+              'Min',
+            ][date.weekday - 1];
 
-                return GestureDetector(
+            return Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  right: index < dates.length - 1 ? 8 : 0,
+                ),
+                child: GestureDetector(
                   onTap: () {
                     setState(() {
                       selectedDate = date;
                     });
                   },
                   child: Container(
-                    width: 68,
-                    height: 80,
-                    margin: const EdgeInsets.only(right: 12),
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    height: 90,
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? AppColor.primary
@@ -256,34 +252,39 @@ class _TodoPageState extends State<TodoPage> {
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          dayName,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: isSelected
-                                ? Colors.white
-                                : AppColor.text.withOpacity(0.6),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            dayName,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: isSelected
+                                  ? Colors.white
+                                  : AppColor.text.withOpacity(0.6),
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          date.day.toString(),
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: isSelected ? Colors.white : AppColor.text,
+                        const SizedBox(height: 6),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            date.day.toString(),
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: isSelected ? Colors.white : AppColor.text,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                );
-              }).toList(),
-            ),
-          ),
+                ),
+              ),
+            );
+          }).toList(),
         );
       },
     );
@@ -291,7 +292,7 @@ class _TodoPageState extends State<TodoPage> {
 
   // Widget untuk baris Todo-list
   Widget _buildTodoItem(int index) {
-    final todo = todos[index];
+    final todo = _todoController.todos[index];
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -300,7 +301,7 @@ class _TodoPageState extends State<TodoPage> {
           GestureDetector(
             onTap: () {
               setState(() {
-                todo.toggleDone();
+                _todoController.toggleTodoDone(index);
               });
             },
             child: Container(
@@ -341,7 +342,7 @@ class _TodoPageState extends State<TodoPage> {
           GestureDetector(
             onTap: () {
               setState(() {
-                todos.removeAt(index);
+                _todoController.deleteTodo(index);
               });
             },
             child: Container(

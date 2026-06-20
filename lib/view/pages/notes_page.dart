@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../controller/notes_controller.dart';
 import '../core/app_color.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -10,17 +11,24 @@ class NotesPage extends StatefulWidget {
 }
 
 class _NotesPageState extends State<NotesPage> {
-  final List<String> _notes = [];
+  final NotesController _notesController = NotesController();
+  final TextEditingController _noteController = TextEditingController();
   late DateTime selectedDate = DateTime.now();
 
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
   void _addNote() {
-    final TextEditingController controller = TextEditingController();
+    _noteController.clear();
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: AppColor.card, // Menggunakan AppColor
+          backgroundColor: AppColor.card,
           surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -34,7 +42,7 @@ class _NotesPageState extends State<NotesPage> {
             ),
           ),
           content: TextField(
-            controller: controller,
+            controller: _noteController,
             maxLines: 3,
             cursorColor: AppColor.primary,
             style: const TextStyle(color: AppColor.text),
@@ -63,9 +71,9 @@ class _NotesPageState extends State<NotesPage> {
                 ),
               ),
               onPressed: () {
-                if (controller.text.isNotEmpty) {
+                if (_noteController.text.trim().isNotEmpty) {
                   setState(() {
-                    _notes.add(controller.text);
+                    _notesController.addNote(_noteController.text);
                   });
                   Navigator.pop(context);
                 }
@@ -79,7 +87,7 @@ class _NotesPageState extends State<NotesPage> {
 
   void _deleteNote(int index) {
     setState(() {
-      _notes.removeAt(index);
+      _notesController.deleteNote(index);
     });
   }
 
@@ -91,6 +99,7 @@ class _NotesPageState extends State<NotesPage> {
     return dates;
   }
 
+  //MENAMPILKAN DIALOG KALENDER
   Future<void> _pickdate() async {
     final pickeddate = await showDatePicker(
       // tunggu user memilih tanggal baru muncul DatePicker
@@ -109,77 +118,76 @@ class _NotesPageState extends State<NotesPage> {
 
   Widget _buildDatePicker() {
     final dates = _getDateList();
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minWidth: constraints.maxWidth),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: dates.map((date) {
-                final isSelected =
-                    date.day == selectedDate.day &&
-                    date.month == selectedDate.month;
-                final dayName = [
-                  'Sen',
-                  'Sel',
-                  'Rab',
-                  'Kam',
-                  'Jum',
-                  'Sab',
-                  'Min',
-                ][date.weekday - 1];
 
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedDate = date;
-                    });
-                  },
-                  child: Container(
-                    width: 68,
-                    height: 80,
-                    margin: const EdgeInsets.only(right: 12),
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppColor.primary
-                          : const Color(0xFFE2E8E4),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          dayName,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: isSelected
-                                ? Colors.white
-                                : AppColor.text.withOpacity(0.6),
-                          ),
+    return Row(
+      children: dates.asMap().entries.map((entry) {
+        final index = entry.key;
+        final date = entry.value;
+        final isSelected =
+            date.day == selectedDate.day && date.month == selectedDate.month;
+        final dayName = [
+          'Sen',
+          'Sel',
+          'Rab',
+          'Kam',
+          'Jum',
+          'Sab',
+          'Min',
+        ][date.weekday - 1];
+
+        return Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(right: index < dates.length - 1 ? 8 : 0),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedDate = date;
+                });
+              },
+              child: Container(
+                height: 90,
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppColor.primary
+                      : const Color(0xFFE2E8E4),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        dayName,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: isSelected
+                              ? Colors.white
+                              : AppColor.text.withOpacity(0.6),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          date.day.toString(),
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: isSelected ? Colors.white : AppColor.text,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                );
-              }).toList(),
+                    const SizedBox(height: 6),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        date.day.toString(),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected ? Colors.white : AppColor.text,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         );
-      },
+      }).toList(),
     );
   }
 
@@ -189,7 +197,7 @@ class _NotesPageState extends State<NotesPage> {
       backgroundColor: AppColor.background, // Menggunakan AppColor
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -206,7 +214,7 @@ class _NotesPageState extends State<NotesPage> {
               ),
 
               Text(
-                'Catat segala hal penting yang ingin kamu ingat!',
+                'Catat idemu hari ini!',
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   color: AppColor.text.withOpacity(0.7),
@@ -234,10 +242,19 @@ class _NotesPageState extends State<NotesPage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               _buildDatePicker(),
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
+              Container(
+                height: 140,
+                decoration: BoxDecoration(
+                  color: AppColor.primary,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+              ),
+              // Placeholder untuk konten lainnya
+              const SizedBox(height: 20),
               const Text(
                 'Notes',
                 style: TextStyle(
@@ -248,7 +265,7 @@ class _NotesPageState extends State<NotesPage> {
               ),
               const SizedBox(height: 15),
               // Daftar catatan
-              _notes.isEmpty
+              _notesController.notes.isEmpty
                   ? const Center(
                       child: Padding(
                         padding: EdgeInsets.symmetric(vertical: 30),
@@ -265,8 +282,10 @@ class _NotesPageState extends State<NotesPage> {
                         horizontal: 16,
                         vertical: 8,
                       ),
-                      itemCount: _notes.length,
+                      itemCount: _notesController.notes.length,
                       itemBuilder: (context, index) {
+                        final note = _notesController.notes[index];
+
                         return Container(
                           margin: const EdgeInsets.only(bottom: 12),
                           decoration: BoxDecoration(
@@ -290,7 +309,7 @@ class _NotesPageState extends State<NotesPage> {
                               color: AppColor.primary,
                             ),
                             title: Text(
-                              _notes[index],
+                              note.content,
                               style: const TextStyle(
                                 color: AppColor.text,
                                 fontWeight: FontWeight.w500,
