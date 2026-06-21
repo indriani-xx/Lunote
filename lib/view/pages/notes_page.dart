@@ -12,17 +12,35 @@ class NotesPage extends StatefulWidget {
 
 class _NotesPageState extends State<NotesPage> {
   final NotesController _notesController = NotesController();
+  final TextEditingController _titleController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
+  int _selectedPriority = 1;
   late DateTime selectedDate = DateTime.now();
 
   @override
   void dispose() {
+    _titleController.dispose();
     _noteController.dispose();
     super.dispose();
   }
 
+  Color _getPriorityColor(int priority) {
+    switch (priority) {
+      case 1:
+        return const Color(0xFFE8F5E9);
+      case 2:
+        return const Color(0xFFB7D7B0);
+      case 3:
+        return const Color(0xFF4A6B5D);
+      default:
+        return const Color(0xFFE8F5E9);
+    }
+  }
+
   void _addNote() {
+    _titleController.clear();
     _noteController.clear();
+    _selectedPriority = 1;
 
     showDialog(
       context: context,
@@ -34,46 +52,136 @@ class _NotesPageState extends State<NotesPage> {
             borderRadius: BorderRadius.circular(16),
           ),
           title: const Text(
-            'Add Note',
+            'Tambah Catatan',
             style: TextStyle(
               color: AppColor.text,
               fontWeight: FontWeight.bold,
               fontSize: 20,
             ),
           ),
-          content: TextField(
-            controller: _noteController,
-            maxLines: 3,
-            cursorColor: AppColor.primary,
-            style: const TextStyle(color: AppColor.text),
-            decoration: const InputDecoration(
-              hintText: 'Tulis catatan...',
-              hintStyle: TextStyle(color: AppColor.muted),
-              focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: AppColor.primary, width: 2),
+          content: SingleChildScrollView(
+            child: SizedBox(
+              width: double.maxFinite,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: _titleController,
+                    cursorColor: AppColor.primary,
+                    style: const TextStyle(color: AppColor.text),
+                    decoration: const InputDecoration(
+                      hintText: 'Judul catatan...',
+                      hintStyle: TextStyle(color: AppColor.muted),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(
+                          color: AppColor.primary,
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _noteController,
+                    maxLines: 3,
+                    cursorColor: AppColor.primary,
+                    style: const TextStyle(color: AppColor.text),
+                    decoration: const InputDecoration(
+                      hintText: 'Tulis catatan...',
+                      hintStyle: TextStyle(color: AppColor.muted),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(
+                          color: AppColor.primary,
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Tingkat pentingnya',
+                    style: TextStyle(
+                      color: AppColor.text,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  StatefulBuilder(
+                    builder: (context, setDialogState) {
+                      return Row(
+                        children: [1, 2, 3].map((priority) {
+                          final isSelected = _selectedPriority == priority;
+                          return Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
+                              child: GestureDetector(
+                                onTap: () {
+                                  setDialogState(() {
+                                    _selectedPriority = priority;
+                                  });
+                                },
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 150),
+                                  height: 42,
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? _getPriorityColor(priority)
+                                        : AppColor.primaryLight,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? _getPriorityColor(priority)
+                                          : Colors.transparent,
+                                    ),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    priority.toString(),
+                                    style: TextStyle(
+                                      color: isSelected
+                                          ? Colors.white
+                                          : AppColor.text,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
           ),
           actions: [
             TextButton(
               child: const Text(
-                'Cancel',
+                'Batal',
                 style: TextStyle(color: AppColor.muted),
               ),
               onPressed: () => Navigator.pop(context),
             ),
             TextButton(
               child: const Text(
-                'Save',
+                'Simpan',
                 style: TextStyle(
                   color: AppColor.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               onPressed: () {
-                if (_noteController.text.trim().isNotEmpty) {
+                final title = _titleController.text.trim();
+                final content = _noteController.text.trim();
+
+                if (title.isNotEmpty && content.isNotEmpty) {
                   setState(() {
-                    _notesController.addNote(_noteController.text);
+                    _notesController.addNote(title, content, _selectedPriority);
                   });
                   Navigator.pop(context);
                 }
@@ -99,10 +207,8 @@ class _NotesPageState extends State<NotesPage> {
     return dates;
   }
 
-  //MENAMPILKAN DIALOG KALENDER
   Future<void> _pickdate() async {
     final pickeddate = await showDatePicker(
-      // tunggu user memilih tanggal baru muncul DatePicker
       context: context,
       initialDate: selectedDate,
       firstDate: DateTime(2000),
@@ -165,7 +271,7 @@ class _NotesPageState extends State<NotesPage> {
                           fontWeight: FontWeight.w500,
                           color: isSelected
                               ? Colors.white
-                              : AppColor.text.withOpacity(0.6),
+                              : AppColor.text.withValues(alpha: 0.6),
                         ),
                       ),
                     ),
@@ -194,7 +300,7 @@ class _NotesPageState extends State<NotesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColor.background, // Menggunakan AppColor
+      backgroundColor: AppColor.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -202,7 +308,6 @@ class _NotesPageState extends State<NotesPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 40),
-              // Header Judul Aplikasi
               Text(
                 'Halo!',
                 style: GoogleFonts.manrope(
@@ -212,12 +317,11 @@ class _NotesPageState extends State<NotesPage> {
                   letterSpacing: -0.5,
                 ),
               ),
-
               Text(
                 'Catat idemu hari ini!',
                 style: GoogleFonts.inter(
                   fontSize: 16,
-                  color: AppColor.text.withOpacity(0.7),
+                  color: AppColor.text.withValues(alpha: 0.7),
                   fontWeight: FontWeight.w400,
                 ),
               ),
@@ -228,7 +332,7 @@ class _NotesPageState extends State<NotesPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}",
+                      '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
                       style: GoogleFonts.manrope(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -245,7 +349,6 @@ class _NotesPageState extends State<NotesPage> {
               const SizedBox(height: 10),
               _buildDatePicker(),
               const SizedBox(height: 20),
-
               Container(
                 height: 140,
                 decoration: BoxDecoration(
@@ -253,7 +356,6 @@ class _NotesPageState extends State<NotesPage> {
                   borderRadius: BorderRadius.circular(24),
                 ),
               ),
-              // Placeholder untuk konten lainnya
               const SizedBox(height: 20),
               const Text(
                 'Notes',
@@ -264,7 +366,6 @@ class _NotesPageState extends State<NotesPage> {
                 ),
               ),
               const SizedBox(height: 15),
-              // Daftar catatan
               _notesController.notes.isEmpty
                   ? const Center(
                       child: Padding(
@@ -293,7 +394,7 @@ class _NotesPageState extends State<NotesPage> {
                             borderRadius: BorderRadius.circular(14),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.04),
+                                color: Colors.black.withValues(alpha: 0.04),
                                 blurRadius: 8,
                                 offset: const Offset(0, 4),
                               ),
@@ -304,16 +405,27 @@ class _NotesPageState extends State<NotesPage> {
                               horizontal: 16,
                               vertical: 4,
                             ),
-                            leading: const Icon(
-                              Icons.notes_rounded,
-                              color: AppColor.primary,
+                            leading: Container(
+                              width: 10,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: _getPriorityColor(note.priority),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
                             ),
                             title: Text(
-                              note.content,
+                              note.judul,
                               style: const TextStyle(
                                 color: AppColor.text,
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w600,
                                 fontSize: 16,
+                              ),
+                            ),
+                            subtitle: Text(
+                              note.content,
+                              style: const TextStyle(
+                                color: AppColor.muted,
+                                fontSize: 13,
                               ),
                             ),
                             trailing: IconButton(
