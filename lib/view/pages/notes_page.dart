@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../controller/notes_controller.dart';
+import '../../model/note.dart';
 import '../core/app_color.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
 class NotesPage extends StatefulWidget {
   const NotesPage({super.key});
@@ -193,12 +195,276 @@ class _NotesPageState extends State<NotesPage> {
     );
   }
 
+  //FUNGSI MENAMPILKAN DETAIL NOTES
+  void showNote(int index) {
+    if (index < 0 || index >= _notesController.notes.length) return;
+
+    final note = _notesController.notes[index];
+    String formattedDate = DateFormat(
+      'EEEE, d MMM yyyy',
+      'id_ID',
+    ).format(selectedDate);
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppColor.card,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+          contentPadding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+          title: Text(
+            note.judul,
+            style: GoogleFonts.manrope(
+              color: AppColor.text,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                note.content,
+                style: GoogleFonts.inter(color: AppColor.text, fontSize: 15),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+
+              Text(
+                formattedDate,
+                style: GoogleFonts.inter(
+                  color: AppColor.text.withValues(alpha: 0.6),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: _getPriorityColor(note.priority),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  'Priority ${note.priority}',
+                  style: const TextStyle(
+                    color: AppColor.text,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: AppColor.muted),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                _deleteNote(index);
+              },
+              child: const Text(
+                'Delete',
+                style: TextStyle(color: Colors.redAccent),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                _editNote(index, note);
+              },
+              child: const Text(
+                'Edit',
+                style: TextStyle(
+                  color: AppColor.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _editNote(int index, Note note) {
+    final titleController = TextEditingController(text: note.judul);
+    final contentController = TextEditingController(text: note.content);
+    int selectedPriority = note.priority;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: AppColor.card,
+              surfaceTintColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: const Text(
+                'Edit Catatan',
+                style: TextStyle(
+                  color: AppColor.text,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              content: SingleChildScrollView(
+                child: SizedBox(
+                  width: double.maxFinite,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextField(
+                        controller: titleController,
+                        style: const TextStyle(color: AppColor.text),
+                        decoration: const InputDecoration(
+                          hintText: 'Judul catatan...',
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: AppColor.primary,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: contentController,
+                        maxLines: 3,
+                        style: const TextStyle(color: AppColor.text),
+                        decoration: const InputDecoration(
+                          hintText: 'Tulis catatan...',
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: AppColor.primary,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Tingkat pentingnya',
+                        style: TextStyle(
+                          color: AppColor.text,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [1, 2, 3].map((priority) {
+                          final isSelected = selectedPriority == priority;
+                          return Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
+                              child: GestureDetector(
+                                onTap: () {
+                                  setDialogState(() {
+                                    selectedPriority = priority;
+                                  });
+                                },
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 150),
+                                  height: 42,
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? _getPriorityColor(priority)
+                                        : AppColor.primaryLight,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? _getPriorityColor(priority)
+                                          : Colors.transparent,
+                                    ),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    priority.toString(),
+                                    style: TextStyle(
+                                      color: isSelected
+                                          ? Colors.white
+                                          : AppColor.text,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text(
+                    'Batal',
+                    style: TextStyle(color: AppColor.muted),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    final newTitle = titleController.text.trim();
+                    final newContent = contentController.text.trim();
+
+                    if (newTitle.isNotEmpty && newContent.isNotEmpty) {
+                      setState(() {
+                        _notesController.editNote(
+                          index,
+                          newTitle,
+                          newContent,
+                          selectedPriority,
+                        );
+                      });
+                      Navigator.pop(dialogContext);
+                    }
+                  },
+                  child: const Text(
+                    'Simpan',
+                    style: TextStyle(
+                      color: AppColor.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  //FUNGSI MENGHAPUS NOTES
   void _deleteNote(int index) {
     setState(() {
       _notesController.deleteNote(index);
     });
   }
 
+  // Fungsi untuk mendapatkan daftar tanggal sekitar tanggal yang dipilih
   List<DateTime> _getDateList() {
     List<DateTime> dates = [];
     for (int i = -2; i <= 2; i++) {
@@ -428,13 +694,7 @@ class _NotesPageState extends State<NotesPage> {
                                 fontSize: 13,
                               ),
                             ),
-                            trailing: IconButton(
-                              icon: const Icon(
-                                Icons.delete_outline_rounded,
-                                color: AppColor.delete,
-                              ),
-                              onPressed: () => _deleteNote(index),
-                            ),
+                            onTap: () => showNote(index),
                           ),
                         );
                       },

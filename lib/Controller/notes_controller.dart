@@ -33,4 +33,12 @@ class NotesController {
       priority: safePriority,
     );
   }
+
+  void showNote(int index) {
+    if (index < 0 || index >= notes.length) return;
+    final note = notes[index];
+    print('Judul: ${note.judul}');
+    print('Content: ${note.content}');
+    print('Priority: ${note.priority}');
+  }
 }
