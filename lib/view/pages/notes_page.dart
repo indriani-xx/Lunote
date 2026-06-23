@@ -4,6 +4,7 @@ import '../../model/note.dart';
 import '../core/app_color.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 class NotesPage extends StatefulWidget {
   const NotesPage({super.key});
@@ -196,6 +197,8 @@ class _NotesPageState extends State<NotesPage> {
   }
 
   //FUNGSI MENAMPILKAN DETAIL NOTES
+  // Menampilkan AlertDialog berisi detail lengkap dari note yang dipilih
+  // Termasuk judul, konten penuh, tanggal, prioritas, dan action buttons (edit/delete)
   void showNote(int index) {
     if (index < 0 || index >= _notesController.notes.length) return;
 
@@ -209,6 +212,7 @@ class _NotesPageState extends State<NotesPage> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
+          // Styling AlertDialog
           backgroundColor: AppColor.card,
           surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(
@@ -216,6 +220,8 @@ class _NotesPageState extends State<NotesPage> {
           ),
           titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
           contentPadding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+
+          // Judul AlertDialog: menampilkan judul note
           title: Text(
             note.judul,
             style: GoogleFonts.manrope(
@@ -224,17 +230,22 @@ class _NotesPageState extends State<NotesPage> {
               fontSize: 18,
             ),
           ),
+
+          // CONTENT AREA - Menampilkan detail note lengkap
+          // Berisi konten penuh, tanggal, dan badge prioritas
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Konten lengkap dari note (tanpa batasan maxLines)
+              // Menampilkan semua text sesuai dengan yang diinput user
               Text(
                 note.content,
                 style: GoogleFonts.inter(color: AppColor.text, fontSize: 15),
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
               ),
 
+              // Tanggal note dalam format Indonesia (EEEE, d MMM yyyy)
+              // Contoh: Senin, 23 Juni 2026
               Text(
                 formattedDate,
                 style: GoogleFonts.inter(
@@ -244,6 +255,8 @@ class _NotesPageState extends State<NotesPage> {
                 ),
               ),
               const SizedBox(height: 12),
+              // Badge prioritas: menampilkan level prioritas (1, 2, 3)
+              // Warna badge berubah sesuai prioritas yang dipilih
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
@@ -263,7 +276,9 @@ class _NotesPageState extends State<NotesPage> {
               ),
             ],
           ),
+          // ACTION BUTTONS - Tombol Cancel, Delete, dan Edit
           actions: [
+            // Tombol Cancel: Menutup dialog tanpa melakukan aksi apapun
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
               child: const Text(
@@ -271,6 +286,7 @@ class _NotesPageState extends State<NotesPage> {
                 style: TextStyle(color: AppColor.muted),
               ),
             ),
+            // Tombol Delete: Menghapus note dan menutup dialog
             TextButton(
               onPressed: () {
                 Navigator.pop(dialogContext);
@@ -281,6 +297,7 @@ class _NotesPageState extends State<NotesPage> {
                 style: TextStyle(color: Colors.redAccent),
               ),
             ),
+            // Tombol Edit: Membuka dialog edit untuk mengubah note
             TextButton(
               onPressed: () {
                 Navigator.pop(dialogContext);
@@ -653,48 +670,94 @@ class _NotesPageState extends State<NotesPage> {
                       itemBuilder: (context, index) {
                         final note = _notesController.notes[index];
 
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          decoration: BoxDecoration(
-                            color: AppColor.card,
-                            borderRadius: BorderRadius.circular(14),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.04),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 4,
+                        // CONTAINER NOTE CARD!!!!!!!!
+                        // Menampilkan setiap note dalam bentuk card yang dapat diklik
+                        // untuk menampilkan detail note di AlertDialog
+                        return GestureDetector(
+                          onTap: () => showNote(index),
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(16),
+                            // Styling: warna card, radius, dan shadow untuk efek depth
+                            decoration: BoxDecoration(
+                              color: AppColor.card,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.04),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
-                            leading: Container(
-                              width: 10,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                color: _getPriorityColor(note.priority),
-                                borderRadius: BorderRadius.circular(999),
-                              ),
+                            child: Row(
+                              children: [
+                                // Indikator prioritas: garis vertikal berwarna sesuai prioritas
+                                // Warna berbeda untuk prioritas 1, 2, dan 3
+                                Container(
+                                  width: 5,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    color: _getPriorityColor(note.priority),
+                                    borderRadius: BorderRadius.circular(99),
+                                  ),
+                                ),
+
+                                const SizedBox(width: 12),
+
+                                // Konten note: judul dan preview konten
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // Judul note - ditampilkan max 1 baris dengan ellipsis
+                                      Text(
+                                        note.judul,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: GoogleFonts.manrope(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+
+                                      const SizedBox(height: 4),
+
+                                      // Preview konten - ditampilkan max 2 baris dengan ellipsis
+                                      // Konten lengkap akan ditampilkan saat membuka detail
+                                      Text(
+                                        note.content,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: GoogleFonts.inter(
+                                          fontSize: 13,
+                                          color: AppColor.muted,
+                                        ),
+                                      ),
+
+                                      // const Spacer(), // INI YANG DORONG KE BAWAH
+                                      // Align(
+                                      //   alignment: Alignment.bottomRight,
+                                      //   child: Text(
+                                      //     "${createAt.year}-${createAt.month}-${createAt.day}", // createAt.toLocal().toString().split(' ')[0],
+                                      //     style: const TextStyle(
+                                      //       fontSize: 12,
+                                      //       color: Colors.grey,
+                                      //     ),
+                                      //   ),
+                                      // ),
+                                    ],
+                                  ),
+                                ),
+
+                                // Icon navigasi untuk menunjukkan card dapat diklik
+                                const Icon(
+                                  Icons.chevron_right_rounded,
+                                  color: AppColor.muted,
+                                ),
+                              ],
                             ),
-                            title: Text(
-                              note.judul,
-                              style: const TextStyle(
-                                color: AppColor.text,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                              ),
-                            ),
-                            subtitle: Text(
-                              note.content,
-                              style: const TextStyle(
-                                color: AppColor.muted,
-                                fontSize: 13,
-                              ),
-                            ),
-                            onTap: () => showNote(index),
                           ),
                         );
                       },

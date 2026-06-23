@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'view/home_page.dart'; // Import nanti
-// Import nanti
+import 'package:intl/date_symbol_data_local.dart';
+import 'view/home_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('id_ID', null); // Inisialisasi format tanggal untuk bahasa Indonesia
+  
   runApp(const MyApp());
 }
 
