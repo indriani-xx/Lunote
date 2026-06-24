@@ -12,6 +12,7 @@ class NotesController {
         judul: judul.trim(),
         content: content.trim(),
         priority: safePriority,
+        createdAt: DateTime.now(),
       ),
     );
   }
@@ -31,6 +32,7 @@ class NotesController {
       judul: judul.trim(),
       content: content.trim(),
       priority: safePriority,
+      createdAt: notes[index].createdAt,
     );
   }
 

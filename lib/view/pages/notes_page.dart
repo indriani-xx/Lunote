@@ -206,7 +206,7 @@ class _NotesPageState extends State<NotesPage> {
     String formattedDate = DateFormat(
       'EEEE, d MMM yyyy',
       'id_ID',
-    ).format(selectedDate);
+    ).format(note.createdAt);
 
     showDialog(
       context: context,
@@ -736,17 +736,19 @@ class _NotesPageState extends State<NotesPage> {
                                         ),
                                       ),
 
-                                      // const Spacer(), // INI YANG DORONG KE BAWAH
-                                      // Align(
-                                      //   alignment: Alignment.bottomRight,
-                                      //   child: Text(
-                                      //     "${createAt.year}-${createAt.month}-${createAt.day}", // createAt.toLocal().toString().split(' ')[0],
-                                      //     style: const TextStyle(
-                                      //       fontSize: 12,
-                                      //       color: Colors.grey,
-                                      //     ),
-                                      //   ),
-                                      // ),
+                                      Align(
+                                        alignment: Alignment.bottomRight,
+                                        child: Text(
+                                          DateFormat(
+                                            'd MMM yyyy',
+                                            'id_ID',
+                                          ).format(note.createdAt),
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
