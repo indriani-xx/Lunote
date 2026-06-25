@@ -140,6 +140,11 @@ class _TodoPageState extends State<TodoPage> {
                   color: AppColor.primary,
                   borderRadius: BorderRadius.circular(24),
                 ),
+                child: Icon(
+                  Icons.calendar_month,
+                  size: 50,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(height: 20),
 

@@ -4,7 +4,6 @@ import '../../model/note.dart';
 import '../core/app_color.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:intl/date_symbol_data_local.dart';
 
 class NotesPage extends StatefulWidget {
   const NotesPage({super.key});
@@ -634,10 +633,12 @@ class _NotesPageState extends State<NotesPage> {
               const SizedBox(height: 20),
               Container(
                 height: 140,
+                width: double.infinity,
                 decoration: BoxDecoration(
                   color: AppColor.primary,
                   borderRadius: BorderRadius.circular(24),
                 ),
+                child: Icon(Icons.sticky_note_2, size: 50, color: Colors.white),
               ),
               const SizedBox(height: 20),
               const Text(
