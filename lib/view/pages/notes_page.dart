@@ -62,7 +62,16 @@ class _NotesPageState extends State<NotesPage> {
     showDialog(
       context: context,
       builder: (context) => const AddNoteDialog(),
-    ).then((_) => setState(() {}));
+    ).then((result) {
+      if (result != null && result is Map) {
+        _notesController.addNote(
+          result['title'],
+          result['content'],
+          result['priority'],
+        );
+        setState(() {});
+      }
+    });
   }
 
   void _showNoteDetail(int index) {
