@@ -452,7 +452,7 @@ class NoteDetailDialog extends StatelessWidget {
             note.content,
             style: GoogleFonts.inter(color: AppColor.text, fontSize: 15),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 12, width: 300),
           Text(
             _formatDate(note.createdAt),
             style: GoogleFonts.inter(
