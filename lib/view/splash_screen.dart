@@ -1,37 +1,48 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:flutter/material.dart';
+import 'home_page.dart';
 
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+class SplashPage extends StatefulWidget {
+  const SplashPage({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  State<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    //timer 5 detik lalu pindah ke home
-    Timer(const Duration(seconds: 5), () {
-      Navigator.pushReplacementNamed(context, '/home');
+    // Mengatur durasi splash screen selama 3 detik sebelum ke HomePage
+    Timer(const Duration(seconds: 3), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 92, 23, 23),
+    return const Scaffold(
+      backgroundColor: Colors.blue, // Ubah warna sesuai selera
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('assets/logo.png', width: 150, height: 150),
-            const SizedBox(height: 20),
-            const Text(
-              'Notise Me',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            // Ganti dengan logo aplikasi kamu
+            Icon(Icons.note_alt, size: 100, color: Colors.white),
+            SizedBox(height: 20),
+            Text(
+              'Indri Notes',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 171, 24, 24),
+              ),
             ),
+            SizedBox(height: 20),
+            CircularProgressIndicator(color: Colors.white), // Animasi loading
           ],
         ),
       ),

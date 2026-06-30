@@ -8,6 +8,7 @@ import 'package:path/path.dart' as p;
 part 'app_database.g.dart';
 
 @DataClassName('NoteEntry')
+//variabel dan antek" nya
 class Notes extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get judul => text()();
