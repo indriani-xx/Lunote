@@ -26,7 +26,19 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('assets/logo.png', width: 150, height: 150),
+            Image.asset(
+              'asset/logocathi.png',
+              width: 150,
+              height: 150,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  width: 150,
+                  height: 150,
+                  color: Colors.grey,
+                  child: const Center(child: Text('Gambar tidak ditemukan')),
+                );
+              },
+            ),
             const SizedBox(height: 20),
             const Text(
               'Notise Me',

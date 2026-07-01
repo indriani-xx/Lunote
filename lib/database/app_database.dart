@@ -9,6 +9,7 @@ part 'app_database.g.dart';
 
 @DataClassName('NoteEntry')
 //variabel dan antek" nya
+// TABEL UNTUK NOTES
 class Notes extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get judul => text()();
@@ -17,7 +18,13 @@ class Notes extends Table {
   DateTimeColumn get createdAt => dateTime()();
 }
 
-@DriftDatabase(tables: [Notes])
+//TABEL UNTUK TODOLIST
+class Todos extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get title => text().withLength(min: 6, max: 40)();
+}
+
+@DriftDatabase(tables: [Notes, Todos])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
@@ -28,7 +35,9 @@ class AppDatabase extends _$AppDatabase {
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'indri_notes.sqlite'));
+    final file = File(
+      p.join(dbFolder.path, 'indri_notes.sqlite'),
+    ); // p itu artinya path, join itu untuk menggabungkan path
     return NativeDatabase(file);
   });
 }
