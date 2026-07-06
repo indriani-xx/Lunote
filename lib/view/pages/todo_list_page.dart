@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../Controller/todo_controller.dart';
-import '../../model/todo.dart';
 import '../core/app_color.dart';
 import 'package:google_fonts/google_fonts.dart';
 
