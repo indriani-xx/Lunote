@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 import '../model/note.dart';
 
 class NotesController {
@@ -39,8 +41,8 @@ class NotesController {
   void showNote(int index) {
     if (index < 0 || index >= notes.length) return;
     final note = notes[index];
-    print('Judul: ${note.judul}');
-    print('Content: ${note.content}');
-    print('Priority: ${note.priority}');
+    debugPrint('Judul: ${note.judul}');
+    debugPrint('Content: ${note.content}');
+    debugPrint('Priority: ${note.priority}');
   }
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../Controller/todo_controller.dart';
 import '../core/app_color.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
+import 'package:intl/intl.dart';
 
 class TodoPage extends StatefulWidget {
   const TodoPage({super.key});
@@ -12,8 +14,12 @@ class TodoPage extends StatefulWidget {
 
 class _TodoPageState extends State<TodoPage> {
   final TodoController _todoController = TodoController();
-  late DateTime selectedDate = DateTime.now();
   final TextEditingController _todoControllerInput = TextEditingController();
+  late DateTime selectedDate = DateTime.now();
+
+  String _formatDate(DateTime date) {
+    return DateFormat('EEEE, d MMM yyyy', 'id_ID').format(date);
+  }
 
   @override
   void dispose() {
@@ -32,7 +38,7 @@ class _TodoPageState extends State<TodoPage> {
           controller: _todoControllerInput,
           decoration: InputDecoration(
             hintText: 'Masukkan tugas baru...',
-            hintStyle: TextStyle(color: AppColor.text.withOpacity(0.5)),
+            hintStyle: TextStyle(color: AppColor.text.withValues(alpha: 0.5)),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: AppColor.primary),
@@ -49,7 +55,7 @@ class _TodoPageState extends State<TodoPage> {
             onPressed: () => Navigator.pop(context),
             child: Text(
               'Batal',
-              style: TextStyle(color: AppColor.text.withOpacity(0.7)),
+              style: TextStyle(color: AppColor.text.withValues(alpha: 0.7)),
             ),
           ),
           TextButton(
@@ -89,19 +95,23 @@ class _TodoPageState extends State<TodoPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 40),
-              Text(
-                'Halo!',
-                style: GoogleFonts.manrope(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: AppColor.text,
+              Transform.scale(
+                scale: 2,
+                child: SizedBox(
+                  width: 90,
+                  height: 90,
+                  child: Lottie.asset(
+                    'lib/asset/animation/hi.json',
+                    fit: BoxFit.contain,
+                    repeat: false,
+                  ),
                 ),
               ),
               Text(
                 'Punya rencana menarik?',
                 style: GoogleFonts.inter(
                   fontSize: 16,
-                  color: AppColor.text.withOpacity(0.7),
+                  color: AppColor.text.withValues(alpha: 0.7),
                 ),
               ),
 
@@ -112,10 +122,11 @@ class _TodoPageState extends State<TodoPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}",
+                      _formatDate(selectedDate),
                       style: GoogleFonts.manrope(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        color: AppColor.text,
                       ),
                     ),
                     IconButton(
@@ -147,7 +158,6 @@ class _TodoPageState extends State<TodoPage> {
               ),
               const SizedBox(height: 20),
 
-              //TODO LIST SECTION
               const Text(
                 'Todo-list',
                 style: TextStyle(
@@ -166,7 +176,7 @@ class _TodoPageState extends State<TodoPage> {
                         child: Text(
                           'Belum ada todo. Buat yang baru!',
                           style: TextStyle(
-                            color: AppColor.text.withOpacity(0.5),
+                            color: AppColor.text.withValues(alpha: 0.5),
                             fontSize: 14,
                           ),
                         ),
@@ -266,7 +276,7 @@ class _TodoPageState extends State<TodoPage> {
                               fontWeight: FontWeight.w500,
                               color: isSelected
                                   ? Colors.white
-                                  : AppColor.text.withOpacity(0.6),
+                                  : AppColor.text.withValues(alpha: 0.6),
                             ),
                           ),
                         ),
@@ -336,7 +346,7 @@ class _TodoPageState extends State<TodoPage> {
                   color: AppColor.text,
                   fontSize: 15,
                   decoration: todo.isDone ? TextDecoration.lineThrough : null,
-                  decorationColor: AppColor.text.withOpacity(0.5),
+                  decorationColor: AppColor.text.withValues(alpha: 0.5),
                 ),
               ),
             ),
@@ -354,7 +364,7 @@ class _TodoPageState extends State<TodoPage> {
               height: 40,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColor.delete.withOpacity(0.1),
+                color: AppColor.delete.withValues(alpha: 0.1),
               ),
               child: Icon(
                 Icons.delete_outline,

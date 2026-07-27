@@ -31,7 +31,7 @@ class _HomePageState extends State<HomePage> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
+              color: Colors.black.withValues(alpha: 0.02),
               blurRadius: 10,
               offset: const Offset(0, -4),
             ),
@@ -44,8 +44,8 @@ class _HomePageState extends State<HomePage> {
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
           selectedItemColor: AppColor.primary, // Warna Sage Green saat aktif
-          unselectedItemColor: AppColor.muted.withOpacity(
-            0.6,
+          unselectedItemColor: AppColor.muted.withValues(
+            alpha: 0.6,
           ), // Warna redup saat tidak aktif
           selectedLabelStyle: const TextStyle(
             fontWeight: FontWeight.w600,
