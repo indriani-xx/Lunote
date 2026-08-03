@@ -32,30 +32,37 @@ class _TodoPageState extends State<TodoPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Tambah Todo Baru'),
-        backgroundColor: AppColor.background,
+        title: Text(
+          'Tambah Todo Baru',
+          style: TextStyle(color: _textColor(context)),
+        ),
+        backgroundColor: _bgColor(context),
         content: TextField(
           controller: _todoControllerInput,
           decoration: InputDecoration(
             hintText: 'Masukkan tugas baru...',
-            hintStyle: TextStyle(color: AppColor.text.withValues(alpha: 0.5)),
+            hintStyle: TextStyle(
+              color: _textColor(context).withValues(alpha: 0.5),
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColor.primary),
+              borderSide: BorderSide(color: _primaryColor(context)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColor.primary, width: 2),
+              borderSide: BorderSide(color: _primaryColor(context), width: 2),
             ),
           ),
-          cursorColor: AppColor.primary,
+          cursorColor: _primaryColor(context),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
               'Batal',
-              style: TextStyle(color: AppColor.text.withValues(alpha: 0.7)),
+              style: TextStyle(
+                color: _textColor(context).withValues(alpha: 0.7),
+              ),
             ),
           ),
           TextButton(
@@ -67,9 +74,9 @@ class _TodoPageState extends State<TodoPage> {
                 Navigator.pop(context);
               }
             },
-            child: const Text(
+            child: Text(
               'Tambah',
-              style: TextStyle(color: AppColor.primary),
+              style: TextStyle(color: _primaryColor(context)),
             ),
           ),
         ],
@@ -77,13 +84,28 @@ class _TodoPageState extends State<TodoPage> {
     );
   }
 
+  Color _bgColor(BuildContext context) =>
+      Theme.of(context).scaffoldBackgroundColor;
+  Color _textColor(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+      ? AppColor.darkTextPrimary
+      : AppColor.text;
+  Color _primaryColor(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+      ? AppColor.darkPrimary
+      : AppColor.primary;
+  Color _dateBgColor(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+      ? AppColor.darkSurface
+      : const Color(0xFFE2E8E4);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColor.background,
+      backgroundColor: _bgColor(context),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddTodoDialog,
-        backgroundColor: AppColor.primary,
+        backgroundColor: _primaryColor(context),
         elevation: 3,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: const Icon(Icons.add_rounded, color: Colors.white, size: 30),
@@ -94,15 +116,19 @@ class _TodoPageState extends State<TodoPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 40),
               Transform.scale(
-                scale: 2,
-                child: SizedBox(
-                  width: 90,
-                  height: 90,
+                scale: 1.5,
+                child: ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).textTheme.bodyLarge?.color ??
+                        Colors.white,
+                    BlendMode.srcIn,
+                  ),
                   child: Lottie.asset(
                     'lib/asset/animation/hi.json',
                     fit: BoxFit.contain,
+                    width: 100,
+                    height: 100,
                     repeat: false,
                   ),
                 ),
@@ -111,7 +137,7 @@ class _TodoPageState extends State<TodoPage> {
                 'Punya rencana menarik?',
                 style: GoogleFonts.inter(
                   fontSize: 16,
-                  color: AppColor.text.withValues(alpha: 0.7),
+                  color: _textColor(context).withValues(alpha: 0.7),
                 ),
               ),
 
@@ -126,13 +152,13 @@ class _TodoPageState extends State<TodoPage> {
                       style: GoogleFonts.manrope(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: AppColor.text,
+                        color: _textColor(context),
                       ),
                     ),
                     IconButton(
                       onPressed: _pickdate,
                       icon: const Icon(Icons.calendar_month),
-                      color: AppColor.text,
+                      color: _textColor(context),
                     ),
                   ],
                 ),
@@ -147,7 +173,7 @@ class _TodoPageState extends State<TodoPage> {
                 height: 140,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: AppColor.primary,
+                  color: _primaryColor(context),
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: Icon(
@@ -158,12 +184,12 @@ class _TodoPageState extends State<TodoPage> {
               ),
               const SizedBox(height: 20),
 
-              const Text(
+              Text(
                 'Todo-list',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColor.text,
+                  color: _textColor(context),
                 ),
               ),
               const SizedBox(height: 15),
@@ -176,7 +202,7 @@ class _TodoPageState extends State<TodoPage> {
                         child: Text(
                           'Belum ada todo. Buat yang baru!',
                           style: TextStyle(
-                            color: AppColor.text.withValues(alpha: 0.5),
+                            color: _textColor(context).withValues(alpha: 0.5),
                             fontSize: 14,
                           ),
                         ),
@@ -243,6 +269,9 @@ class _TodoPageState extends State<TodoPage> {
               'Sab',
               'Min',
             ][date.weekday - 1];
+            final primaryColor = _primaryColor(context);
+            final textColor = _textColor(context);
+            final dateBgColor = _dateBgColor(context);
 
             return Expanded(
               child: Padding(
@@ -259,9 +288,7 @@ class _TodoPageState extends State<TodoPage> {
                     height: 90,
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppColor.primary
-                          : const Color(0xFFE2E8E4),
+                      color: isSelected ? primaryColor : dateBgColor,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Column(
@@ -276,7 +303,7 @@ class _TodoPageState extends State<TodoPage> {
                               fontWeight: FontWeight.w500,
                               color: isSelected
                                   ? Colors.white
-                                  : AppColor.text.withValues(alpha: 0.6),
+                                  : textColor.withValues(alpha: 0.6),
                             ),
                           ),
                         ),
@@ -288,7 +315,7 @@ class _TodoPageState extends State<TodoPage> {
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: isSelected ? Colors.white : AppColor.text,
+                              color: isSelected ? Colors.white : textColor,
                             ),
                           ),
                         ),
@@ -307,6 +334,10 @@ class _TodoPageState extends State<TodoPage> {
   // Widget untuk baris Todo-list
   Widget _buildTodoItem(int index) {
     final todo = _todoController.todos[index];
+    final primaryColor = _primaryColor(context);
+    final textColor = _textColor(context);
+    final dateBgColor = _dateBgColor(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -323,8 +354,8 @@ class _TodoPageState extends State<TodoPage> {
               height: 24,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColor.primary, width: 2),
-                color: todo.isDone ? AppColor.primary : Colors.transparent,
+                border: Border.all(color: primaryColor, width: 2),
+                color: todo.isDone ? primaryColor : Colors.transparent,
               ),
               child: todo.isDone
                   ? const Icon(Icons.check, size: 14, color: Colors.white)
@@ -337,16 +368,16 @@ class _TodoPageState extends State<TodoPage> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
               decoration: BoxDecoration(
-                color: const Color(0xFFE2E8E4),
+                color: dateBgColor,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 todo.title,
                 style: TextStyle(
-                  color: AppColor.text,
+                  color: textColor,
                   fontSize: 15,
                   decoration: todo.isDone ? TextDecoration.lineThrough : null,
-                  decorationColor: AppColor.text.withValues(alpha: 0.5),
+                  decorationColor: textColor.withValues(alpha: 0.5),
                 ),
               ),
             ),

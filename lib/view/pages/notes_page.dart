@@ -129,8 +129,6 @@ class _NotesPageState extends State<NotesPage> {
     }
   }
 
-  // ============ WIDGET BUILDERS ============
-
   Widget _buildDatePicker() {
     final dates = _getDateRange();
     const weekDays = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
@@ -157,6 +155,24 @@ class _NotesPageState extends State<NotesPage> {
     );
   }
 
+  Color _bgColor(BuildContext context) =>
+      Theme.of(context).scaffoldBackgroundColor;
+  Color _cardColor(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+      ? AppColor.darkCard
+      : AppColor.card;
+  Color _textColor(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+      ? AppColor.darkTextPrimary
+      : AppColor.text;
+  Color _mutedColor(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+      ? AppColor.darkTextSecondary
+      : AppColor.muted;
+  Color _primaryColor(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+      ? AppColor.darkPrimary
+      : AppColor.primary;
   Widget _buildNoteCard(Note note, int index) {
     final priorityColor = PriorityHelper.getColor(note.priority);
     final priorityTextColor = PriorityHelper.getTextColor(note.priority);
@@ -168,7 +184,7 @@ class _NotesPageState extends State<NotesPage> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColor.card,
+          color: _cardColor(context),
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
@@ -219,7 +235,7 @@ class _NotesPageState extends State<NotesPage> {
                     style: GoogleFonts.manrope(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: AppColor.text,
+                      color: _textColor(context),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -229,7 +245,7 @@ class _NotesPageState extends State<NotesPage> {
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
                       fontSize: 13,
-                      color: AppColor.muted,
+                      color: _mutedColor(context),
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -246,7 +262,7 @@ class _NotesPageState extends State<NotesPage> {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: AppColor.muted),
+            Icon(Icons.chevron_right_rounded, color: _mutedColor(context)),
           ],
         ),
       ),
@@ -257,15 +273,18 @@ class _NotesPageState extends State<NotesPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 40),
         Transform.scale(
-          scale: 2,
-          child: SizedBox(
-            width: 90,
-            height: 90,
+          scale: 1.5,
+          child: ColorFiltered(
+            colorFilter: ColorFilter.mode(
+              Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
+              BlendMode.srcIn,
+            ),
             child: Lottie.asset(
               'lib/asset/animation/hi.json',
               fit: BoxFit.contain,
+              width: 100,
+              height: 100,
               repeat: false,
             ),
           ),
@@ -274,7 +293,7 @@ class _NotesPageState extends State<NotesPage> {
           'Catat idemu hari ini!',
           style: GoogleFonts.inter(
             fontSize: 16,
-            color: AppColor.text.withValues(alpha: 0.7),
+            color: _textColor(context).withValues(alpha: 0.7),
             fontWeight: FontWeight.w400,
           ),
         ),
@@ -287,13 +306,13 @@ class _NotesPageState extends State<NotesPage> {
               style: GoogleFonts.manrope(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: AppColor.text,
+                color: _textColor(context),
               ),
             ),
             IconButton(
               onPressed: _pickDate,
               icon: const Icon(Icons.calendar_month),
-              color: AppColor.text,
+              color: _textColor(context),
             ),
           ],
         ),
@@ -309,7 +328,7 @@ class _NotesPageState extends State<NotesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColor.background,
+      backgroundColor: _bgColor(context),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -328,7 +347,7 @@ class _NotesPageState extends State<NotesPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddNoteDialog,
-        backgroundColor: AppColor.primary,
+        backgroundColor: _primaryColor(context),
         elevation: 3,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: const Icon(Icons.add_rounded, color: Colors.white, size: 30),
@@ -341,10 +360,10 @@ class _NotesPageState extends State<NotesPage> {
       height: 140,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColor.primary,
+        color: _primaryColor(context),
         borderRadius: BorderRadius.circular(24),
       ),
-      child: const Icon(Icons.sticky_note_2, size: 50, color: Colors.white),
+      child: Icon(Icons.sticky_note_2, size: 50, color: Colors.white),
     );
   }
 
@@ -354,19 +373,19 @@ class _NotesPageState extends State<NotesPage> {
       style: GoogleFonts.manrope(
         fontSize: 20,
         fontWeight: FontWeight.bold,
-        color: AppColor.text,
+        color: _textColor(context),
       ),
     );
   }
 
   Widget _buildNotesList() {
     if (_notesController.notes.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 30),
+          padding: const EdgeInsets.symmetric(vertical: 30),
           child: Text(
             'Belum ada catatan',
-            style: TextStyle(color: AppColor.muted, fontSize: 16),
+            style: TextStyle(color: _mutedColor(context), fontSize: 16),
           ),
         ),
       );
@@ -454,12 +473,17 @@ class NoteDetailDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final priorityColor = PriorityHelper.getColor(note.priority);
     final priorityTextColor = PriorityHelper.getTextColor(note.priority);
     final priorityLabel = PriorityHelper.getLabel(note.priority);
+    final cardColor = isDark ? AppColor.darkCard : AppColor.card;
+    final textColor = isDark ? AppColor.darkTextPrimary : AppColor.text;
+    final mutedColor = isDark ? AppColor.darkTextSecondary : AppColor.muted;
+    final primaryColor = isDark ? AppColor.darkPrimary : AppColor.primary;
 
     return AlertDialog(
-      backgroundColor: AppColor.card,
+      backgroundColor: cardColor,
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
@@ -472,7 +496,7 @@ class NoteDetailDialog extends StatelessWidget {
             child: Text(
               note.judul,
               style: GoogleFonts.manrope(
-                color: AppColor.text,
+                color: textColor,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
               ),
@@ -504,16 +528,20 @@ class NoteDetailDialog extends StatelessWidget {
             Text(
               _formatDate(note.createdAt),
               style: GoogleFonts.inter(
-                color: AppColor.muted,
+                color: mutedColor,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const Divider(height: 24, thickness: 1),
+            Divider(
+              height: 24,
+              thickness: 1,
+              color: mutedColor.withValues(alpha: 0.3),
+            ),
             Text(
               note.content,
               style: GoogleFonts.inter(
-                color: AppColor.text,
+                color: textColor,
                 fontSize: 15,
                 height: 1.5,
               ),
@@ -540,7 +568,7 @@ class NoteDetailDialog extends StatelessWidget {
           child: Text(
             'Tutup',
             style: GoogleFonts.inter(
-              color: AppColor.muted,
+              color: mutedColor,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -551,7 +579,7 @@ class NoteDetailDialog extends StatelessWidget {
             _showEditDialog(context);
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColor.primary,
+            backgroundColor: primaryColor,
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -669,8 +697,14 @@ class _NoteFormDialogState extends State<NoteFormDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark ? AppColor.darkCard : AppColor.card;
+    final textColor = isDark ? AppColor.darkTextPrimary : AppColor.text;
+    final mutedColor = isDark ? AppColor.darkTextSecondary : AppColor.muted;
+    final primaryColor = isDark ? AppColor.darkPrimary : AppColor.primary;
+
     return AlertDialog(
-      backgroundColor: AppColor.card,
+      backgroundColor: cardColor,
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
@@ -679,7 +713,7 @@ class _NoteFormDialogState extends State<NoteFormDialog> {
       title: Text(
         widget.dialogTitle,
         style: GoogleFonts.manrope(
-          color: AppColor.text,
+          color: textColor,
           fontWeight: FontWeight.bold,
           fontSize: 20,
         ),
@@ -691,20 +725,20 @@ class _NoteFormDialogState extends State<NoteFormDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTitleField(),
+              _buildTitleField(textColor, mutedColor, primaryColor),
               const SizedBox(height: 16),
-              _buildContentField(),
+              _buildContentField(textColor, mutedColor, primaryColor),
               const SizedBox(height: 20),
               Text(
                 'Tingkat Prioritas',
                 style: GoogleFonts.inter(
-                  color: AppColor.text,
+                  color: textColor,
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
                 ),
               ),
               const SizedBox(height: 10),
-              _buildPrioritySelector(),
+              _buildPrioritySelector(mutedColor),
             ],
           ),
         ),
@@ -715,7 +749,7 @@ class _NoteFormDialogState extends State<NoteFormDialog> {
           child: Text(
             'Batal',
             style: GoogleFonts.inter(
-              color: AppColor.muted,
+              color: mutedColor,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -723,7 +757,7 @@ class _NoteFormDialogState extends State<NoteFormDialog> {
         ElevatedButton(
           onPressed: widget.onSave,
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColor.primary,
+            backgroundColor: primaryColor,
             elevation: 0,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             shape: RoundedRectangleBorder(
@@ -742,14 +776,18 @@ class _NoteFormDialogState extends State<NoteFormDialog> {
     );
   }
 
-  Widget _buildTitleField() {
+  Widget _buildTitleField(
+    Color textColor,
+    Color mutedColor,
+    Color primaryColor,
+  ) {
     return TextField(
       controller: widget.titleController,
-      cursorColor: AppColor.primary,
-      style: GoogleFonts.inter(color: AppColor.text),
+      cursorColor: primaryColor,
+      style: GoogleFonts.inter(color: textColor),
       decoration: InputDecoration(
         hintText: 'Judul catatan...',
-        hintStyle: GoogleFonts.inter(color: AppColor.muted),
+        hintStyle: GoogleFonts.inter(color: mutedColor),
         filled: true,
         fillColor: Colors.black.withValues(alpha: 0.03),
         contentPadding: const EdgeInsets.symmetric(
@@ -762,21 +800,25 @@ class _NoteFormDialogState extends State<NoteFormDialog> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColor.primary, width: 1.5),
+          borderSide: BorderSide(color: primaryColor, width: 1.5),
         ),
       ),
     );
   }
 
-  Widget _buildContentField() {
+  Widget _buildContentField(
+    Color textColor,
+    Color mutedColor,
+    Color primaryColor,
+  ) {
     return TextField(
       controller: widget.contentController,
       maxLines: 4,
-      cursorColor: AppColor.primary,
-      style: GoogleFonts.inter(color: AppColor.text),
+      cursorColor: primaryColor,
+      style: GoogleFonts.inter(color: textColor),
       decoration: InputDecoration(
         hintText: 'Tulis isi catatan...',
-        hintStyle: GoogleFonts.inter(color: AppColor.muted),
+        hintStyle: GoogleFonts.inter(color: mutedColor),
         filled: true,
         fillColor: Colors.black.withValues(alpha: 0.03),
         contentPadding: const EdgeInsets.all(16),
@@ -786,13 +828,13 @@ class _NoteFormDialogState extends State<NoteFormDialog> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColor.primary, width: 1.5),
+          borderSide: BorderSide(color: primaryColor, width: 1.5),
         ),
       ),
     );
   }
 
-  Widget _buildPrioritySelector() {
+  Widget _buildPrioritySelector(Color mutedColor) {
     return Row(
       children: [1, 2, 3].map((priorityValue) {
         final isSelected = _currentPriority == priorityValue;
@@ -832,7 +874,7 @@ class _NoteFormDialogState extends State<NoteFormDialog> {
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: isSelected ? textColor : AppColor.muted,
+                        color: isSelected ? textColor : mutedColor,
                       ),
                     ),
                   ],
@@ -862,13 +904,18 @@ class _DatePickerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? AppColor.darkPrimary : AppColor.primary;
+    final textColor = isDark ? AppColor.darkTextPrimary : AppColor.text;
+    final dateBgColor = isDark ? AppColor.darkSurface : const Color(0xFFE2E8E4);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         height: 90,
         padding: const EdgeInsets.symmetric(horizontal: 6),
         decoration: BoxDecoration(
-          color: isSelected ? AppColor.primary : const Color(0xFFE2E8E4),
+          color: isSelected ? primaryColor : dateBgColor,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
@@ -881,7 +928,7 @@ class _DatePickerItem extends StatelessWidget {
                 fontWeight: FontWeight.w500,
                 color: isSelected
                     ? Colors.white
-                    : AppColor.text.withValues(alpha: 0.6),
+                    : textColor.withValues(alpha: 0.6),
               ),
             ),
             const SizedBox(height: 6),
@@ -890,7 +937,7 @@ class _DatePickerItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.white : AppColor.text,
+                color: isSelected ? Colors.white : textColor,
               ),
             ),
           ],

@@ -39,7 +39,7 @@ class _SplashScreenState extends State<SplashScreen> {
           width: 150,
           height: 150,
           decoration: BoxDecoration(
-            color: Colors.grey.withOpacity(0.15),
+            color: Colors.grey.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(24),
           ),
           child: const Center(child: Text('Logo not found')),
@@ -157,7 +157,7 @@ class _SplashProgress extends StatelessWidget {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: AppColor.primary.withOpacity(0.25),
+                    color: AppColor.primary.withValues(alpha: 0.25),
                     blurRadius: 10,
                   ),
                 ],
@@ -169,7 +169,7 @@ class _SplashProgress extends StatelessWidget {
         Text(
           'Loading...',
           style: GoogleFonts.inter(
-            color: AppColor.text.withOpacity(0.55),
+            color: AppColor.text.withValues(alpha: 0.55),
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),

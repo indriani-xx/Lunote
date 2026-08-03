@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'pages/notes_page.dart';
 import 'pages/todo_list_page.dart';
 import 'core/app_color.dart';
+import '../../Controller/theme_controller.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,11 +24,39 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppColor.background, // Set background utama di sini
+      appBar: AppBar(
+        elevation:
+            0, // Menghilangkan garis/bayangan bawah agar tetap terkesan 'clean'
+        backgroundColor: theme.scaffoldBackgroundColor,
+        foregroundColor: theme.textTheme.bodyLarge?.color,
+        actions: [
+          ValueListenableBuilder<ThemeMode>(
+            valueListenable: ThemeController.themeMode,
+            builder: (context, currentMode, child) {
+              final isDarkMode = currentMode == ThemeMode.dark;
+              return IconButton(
+                icon: Icon(
+                  isDarkMode
+                      ? Icons.light_mode_rounded
+                      : Icons.dark_mode_rounded,
+                ),
+                onPressed: () {
+                  ThemeController.toggleTheme();
+                },
+                tooltip: isDarkMode ? 'Mode Terang' : 'Mode Gelap',
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: _pages[_selectedIndex],
       bottomNavigationBar: Container(
-        // Dibungkus container agar kita bisa memberi bayangan halus di navigasi bawah
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
@@ -38,15 +67,17 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         child: BottomNavigationBar(
-          backgroundColor: AppColor.card, // Warna dasar putih bersih
-          elevation: 0, // Matikan shadow bawaan yang kaku
+          backgroundColor: isDark
+              ? AppColor.darkSurface
+              : const Color.fromRGBO(255, 255, 255, 1),
+          elevation: 0,
           type: BottomNavigationBarType.fixed,
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          selectedItemColor: AppColor.primary, // Warna Sage Green saat aktif
-          unselectedItemColor: AppColor.muted.withValues(
-            alpha: 0.6,
-          ), // Warna redup saat tidak aktif
+          selectedItemColor: isDark ? AppColor.darkButton : AppColor.primary,
+          unselectedItemColor: isDark
+              ? Colors.grey
+              : AppColor.muted.withValues(alpha: 0.6),
           selectedLabelStyle: const TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 12,
@@ -66,9 +97,7 @@ class _HomePageState extends State<HomePage> {
             BottomNavigationBarItem(
               icon: Padding(
                 padding: EdgeInsets.only(bottom: 4),
-                child: Icon(
-                  Icons.assignment_turned_in_rounded,
-                ), // Icon todo yang lebih clean
+                child: Icon(Icons.assignment_turned_in_rounded),
               ),
               label: 'Todo',
             ),
