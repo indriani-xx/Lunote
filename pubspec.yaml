@@ -33,5 +33,6 @@ flutter:
   assets:
     - lib/asset/animation/hi.json 
     - lib/asset/
+    - lib/asset/logocathi.png
     - lib/asset/animation/
 

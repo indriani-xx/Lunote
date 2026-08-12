@@ -43,10 +43,34 @@ class AppColor {
     18,
   ); // Muted Mint (Segar, kontras, & nyaman di mata)
   static const Color darkCard = Color(0xFF1E2421); // Kartu kalender/item
-  static const Color darkSurface = Color(0xFF181E1C);  // Bottom Navigation
+  static const Color darkSurface = Color(0xFF181E1C); // Bottom Navigation
   static const Color darkTextPrimary = Color(
     0xFFF0F4F2,
   ); // Teks terang (Off-white)
   static const Color darkButton = Color.fromARGB(255, 47, 171, 78);
   static const Color darkTextSecondary = Color(0xFF9AA4A0);
+}
+
+extension AppColorTheme on BuildContext {
+  Color get bgColor => Theme.of(this).scaffoldBackgroundColor;
+
+  Color get cardColor => Theme.of(this).brightness == Brightness.dark
+      ? AppColor.darkCard
+      : AppColor.card;
+
+  Color get textColor => Theme.of(this).brightness == Brightness.dark
+      ? AppColor.darkTextPrimary
+      : AppColor.text;
+
+  Color get mutedTextColor => Theme.of(this).brightness == Brightness.dark
+      ? AppColor.darkTextSecondary
+      : AppColor.muted;
+
+  Color get primaryColor => Theme.of(this).brightness == Brightness.dark
+      ? AppColor.darkPrimary
+      : AppColor.primary;
+
+  Color get dateBgColor => Theme.of(this).brightness == Brightness.dark
+      ? AppColor.darkSurface
+      : const Color(0xFFE2E8E4);
 }

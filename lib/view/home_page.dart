@@ -12,11 +12,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
+  int _selectedIndex =
+      0; //tanda garis bawah _ berarti fungsi ini bersifat rahasia/private, hanya bisa dipakai di dalam file kode ini saja
 
   static const List<Widget> _pages = [NotesPage(), TodoPage()];
 
   void _onItemTapped(int index) {
+    //Flutter otomatis mendeteksi tombol keberapa yang kamu tekan (0, 1, atau 2) lalu memasukkan angka tersebut ke dalam variabel bernama index ini
     setState(() {
       _selectedIndex = index;
     });
@@ -32,17 +34,22 @@ class _HomePageState extends State<HomePage> {
         elevation:
             0, // Menghilangkan garis/bayangan bawah agar tetap terkesan 'clean'
         backgroundColor: theme.scaffoldBackgroundColor,
-        foregroundColor: theme.textTheme.bodyLarge?.color,
+        foregroundColor: theme
+            .textTheme
+            .bodyLarge
+            ?.color, //ika tema bodyLarge memiliki pengaturan warna, gunakan warna itu. Jika ternyata kosong (null), gunakan warna bawaan sistem agar aplikasi tidak error.
         actions: [
           ValueListenableBuilder<ThemeMode>(
+            //=====ValueListenableBuilder, yang merupakan fitur bawaan Flutter untuk mendengarkan perubahan data secara langsung===
             valueListenable: ThemeController.themeMode,
             builder: (context, currentMode, child) {
               final isDarkMode = currentMode == ThemeMode.dark;
               return IconButton(
                 icon: Icon(
                   isDarkMode
-                      ? Icons.light_mode_rounded
-                      : Icons.dark_mode_rounded,
+                      ? Icons
+                            .light_mode_rounded //saat mode gelap aktif, icon yg muncul icon light
+                      : Icons.dark_mode_rounded, //begitu sebaliknya
                 ),
                 onPressed: () {
                   ThemeController.toggleTheme();
@@ -70,12 +77,17 @@ class _HomePageState extends State<HomePage> {
           backgroundColor: isDark
               ? AppColor.darkSurface
               : const Color.fromRGBO(255, 255, 255, 1),
-          elevation: 0,
-          type: BottomNavigationBarType.fixed,
-          currentIndex: _selectedIndex,
+          elevation: 0, //menghilangkan garis di atas nav
+          type: BottomNavigationBarType
+              .fixed, //Membuat posisi tombol tetap dan tidak bergerak atau bergeser saat ditekan
+          currentIndex:
+              _selectedIndex, // Menandai tombol mana yang sedang aktif atau dipilih saat ini berdasarkan angka dari variabel _selectedIndex.
           onTap: _onItemTapped,
-          selectedItemColor: isDark ? AppColor.darkButton : AppColor.primary,
-          unselectedItemColor: isDark
+          selectedItemColor: isDark
+              ? AppColor.darkButton
+              : AppColor.primary, //warna icon nav kalok di pilih
+          unselectedItemColor:
+              isDark //warna icon kalok gak ddi pilih
               ? Colors.grey
               : AppColor.muted.withValues(alpha: 0.6),
           selectedLabelStyle: const TextStyle(
@@ -87,6 +99,7 @@ class _HomePageState extends State<HomePage> {
             fontSize: 12,
           ),
           items: const [
+            //list icon
             BottomNavigationBarItem(
               icon: Padding(
                 padding: EdgeInsets.only(bottom: 4),

@@ -1,18 +1,25 @@
-import '../model/todo.dart';
+import '../data/database/app_database.dart';
 
 class TodoController {
-  List<Todo> todos = [];
+  final AppDatabase _db = AppDatabase();
 
-  void addTodo(String title) {
-    todos.add(Todo(title: title));
+  Stream<List<Todo>> get allTodos => _db.watchAllTodos();
+
+  Future<void> addTodo(String title) async {
+    if (title.trim().isEmpty) return;
+
+    final newTodo = TodosCompanion.insert(title: title.trim());
+    await _db.insertTodo(newTodo);
   }
 
-  void toggleTodoDone(int index) {
-    todos[index].toggleDone();
+  Future<void> deleteTodo(int id) async {
+    await _db.deleteTodo(id);
   }
 
-  void deleteTodo(int index) {
-    todos.removeAt(index);
+  Future<bool> toggleTodoDone(Todo todo) async {
+    final updatedTodo = todo.copyWith(isDone: !todo.isDone);
+    return _db.updateTodo(updatedTodo);
   }
-  //tambahin method notes ama todo
 }
+
+//tambahin method notes ama todo

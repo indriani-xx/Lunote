@@ -1,8 +1,8 @@
+//Pusaka ini agar aplikasi Flutter kamu bisa menjalankan proses berat di latar belakang tanpa membuat layar aplikasi macet (freeze)
+//Digunakan untuk menunda eksekusi kode atau membuat proses berulang
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import '../view/core/app_color.dart';
 import 'home_page.dart';
 
@@ -20,8 +20,13 @@ class _SplashScreenState extends State<SplashScreen> {
 
     // timer 5 detik lalu pindah ke home
     Timer(const Duration(seconds: 5), () {
+      // apakah splash screen nya ditutup?
+      // return = 2. JAWABAN YA: "Stop! Berhenti di sini! Jangan lanjut ke bawah!"
       if (!mounted) return;
+      // 3. JAWABAN TIDAK (artinya mounted = true, alias widget masih aktif di layar):
+      // Lewati baris return di atas, lalu jalankan perintah di bawah ini:
       Navigator.pushReplacement(
+        //pushReplacement = pindah ke halaman baru, yg lama di hancur kan
         context,
         MaterialPageRoute(builder: (_) => const HomePage()),
       );
@@ -30,11 +35,13 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    //menyimpan logo ke dlm variabel,kode di bagian bawah (body aplikasi) akan menjadi lebih bersih dan rapi.
     final logo = Image.asset(
-      'asset/logocathi.png',
+      'lib/asset/logocathi.png',
       width: 150,
       height: 150,
       errorBuilder: (context, error, stackTrace) {
+        // jaga" kalok logo gak bisa dimuat, nanti bakal muncul container bkn kotak merah error
         return Container(
           width: 150,
           height: 150,
@@ -56,7 +63,11 @@ class _SplashScreenState extends State<SplashScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFFF4F6F0), Color(0xFFE8EFE3), Color(0xFFF4F6F0)],
+            colors: [
+              Color(0xFFFAF6F0), // Soft Vanilla
+              Color(0xFFF0E5D8), // Warm Oat / Cream
+              Color(0xFFFAF6F0),
+            ], // Soft Vanilla
           ),
         ),
         child: SafeArea(
@@ -66,10 +77,20 @@ class _SplashScreenState extends State<SplashScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  //Saat aplikasi dibuka, logo tidak langsung muncul mengagetkan,
+                  // melainkan muncul samar-samar dari ukuran agak kecil, lalu membesar
+                  //sedikit ke ukuran asli secara mulus selama 0,65 detik.
                   TweenAnimationBuilder<double>(
-                    tween: Tween(begin: 0, end: 1),
-                    duration: const Duration(milliseconds: 650),
-                    curve: Curves.easeOutCubic,
+                    //TweenAnimationBuilder = widget bawaan Flutter untuk membuat animasi sederhana tanpa perlu membuat controller sendiri
+                    tween: Tween(
+                      begin: 0,
+                      end: 1,
+                    ), //Ini adalah mesin hitung yang akan menghitung angka dari 0 sampai 1 secara bertahap, misal 0.1 0.2
+                    duration: const Duration(
+                      milliseconds: 650,
+                    ), //Menentukan durasi kecepatan animasi.
+                    curve: Curves
+                        .easeOutCubic, //membuat animasi bergerak cepat di awal lalu melambat secara halus di akhir
                     builder: (context, value, child) {
                       return Opacity(
                         opacity: value,
@@ -99,7 +120,7 @@ class _SplashScreenState extends State<SplashScreen> {
                       );
                     },
                     child: Text(
-                      'Notise Me',
+                      'Lunote －O－',
                       style: GoogleFonts.manrope(
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
@@ -142,6 +163,7 @@ class _SplashProgress extends StatelessWidget {
             const SizedBox(width: 10),
             Flexible(
               child: LinearProgressIndicator(
+                //widget yang di dalam nya ada animasi garis bergerak dari kiri ke kanan t
                 minHeight: 8,
                 backgroundColor: AppColor.primaryLight,
                 color: AppColor.primary,

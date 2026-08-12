@@ -1,15 +1,16 @@
 // notes_page.dart
 import 'package:flutter/material.dart';
+import '../../data/database/app_database.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../controller/notes_controller.dart';
-import '../../model/note.dart';
 import '../core/app_color.dart';
 import 'package:lottie/lottie.dart';
 
 /// Helper terpusat untuk skema warna & label priority
 class PriorityHelper {
   static Color getColor(int priority) {
+    // warna bg tulisan teks priority
     switch (priority) {
       case 3: // Tinggi
         return const Color(0xFFFFECEB);
@@ -22,6 +23,7 @@ class PriorityHelper {
   }
 
   static Color getTextColor(int priority) {
+    //warna priority
     switch (priority) {
       case 3:
         return const Color(0xFFD32F2F);
@@ -34,6 +36,7 @@ class PriorityHelper {
   }
 
   static String getLabel(int priority) {
+    //teks priority
     switch (priority) {
       case 3:
         return 'Tinggi';
@@ -55,18 +58,22 @@ class NotesPage extends StatefulWidget {
 }
 
 class _NotesPageState extends State<NotesPage> {
+  //Inisialisasi controller
   final NotesController _notesController = NotesController();
-  late DateTime _selectedDate = DateTime.now();
+  DateTime _selectedDate = DateTime.now();
 
   String _formatDate(DateTime date) {
+    //tgl format indo lebih lengkap
     return DateFormat('EEEE, d MMM yyyy', 'id_ID').format(date);
   }
 
   String _formatShortDate(DateTime date) {
+    //tgl format indo tanpa hari, untuk tampilan catatan list
     return DateFormat('d MMM yyyy', 'id_ID').format(date);
   }
 
   List<DateTime> _getDateRange() {
+    //ngambil tanggal -2 dari hari ini
     return List.generate(
       5,
       (index) => _selectedDate.add(Duration(days: index - 2)),
@@ -74,40 +81,76 @@ class _NotesPageState extends State<NotesPage> {
   }
 
   // ============ DIALOG METHODS ============
-
+  //TAMBAH NOTES
   void _showAddNoteDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => const AddNoteDialog(),
-    ).then((result) {
+    showDialog(context: context, builder: (context) => AddNoteDialog()).then((
+      result,
+    ) {
       if (result != null && result is Map) {
         _notesController.addNote(
-          result['title'],
-          result['content'],
-          result['priority'],
+          judul: result['title'],
+          content: result['content'],
+          priority: result['priority'],
         );
         setState(() {});
       }
     });
   }
 
-  void _showNoteDetail(int index) {
-    if (index < 0 || index >= _notesController.notes.length) return;
-
+  void _showNoteDetail(NoteEntry note) {
     showDialog(
       context: context,
-      builder: (context) => NoteDetailDialog(
-        note: _notesController.notes[index],
-        onDelete: () {
-          setState(() {
-            _notesController.deleteNote(index);
-          });
-        },
-        onEdit: (newTitle, newContent, priority) {
-          setState(() {
-            _notesController.editNote(index, newTitle, newContent, priority);
-          });
-        },
+      builder: (context) {
+        return NoteDetailDialog(
+          note: note,
+          onDelete: () {
+            setState(() {
+              _notesController.deleteNote(note.id);
+            });
+          },
+          onEdit: (newTitle, newContent, priority) {
+            setState(() {
+              _notesController.editNote(
+                oldNote: note,
+                newJudul: newTitle,
+                newContent: newContent,
+                newPriority: priority,
+              );
+            });
+          },
+        );
+      },
+    );
+  }
+
+  // ============ MAIN BUILD ============
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: context.bgColor,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(),
+              _buildHeroBanner(),
+              const SizedBox(height: 20),
+              _buildNotesHeader(),
+              const SizedBox(height: 15),
+              _buildNotesList(),
+            ],
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddNoteDialog,
+        backgroundColor: context.primaryColor,
+        elevation: 3,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: const Icon(Icons.add_rounded, color: Colors.white, size: 30),
       ),
     );
   }
@@ -155,36 +198,172 @@ class _NotesPageState extends State<NotesPage> {
     );
   }
 
-  Color _bgColor(BuildContext context) =>
-      Theme.of(context).scaffoldBackgroundColor;
-  Color _cardColor(BuildContext context) =>
-      Theme.of(context).brightness == Brightness.dark
-      ? AppColor.darkCard
-      : AppColor.card;
-  Color _textColor(BuildContext context) =>
-      Theme.of(context).brightness == Brightness.dark
-      ? AppColor.darkTextPrimary
-      : AppColor.text;
-  Color _mutedColor(BuildContext context) =>
-      Theme.of(context).brightness == Brightness.dark
-      ? AppColor.darkTextSecondary
-      : AppColor.muted;
-  Color _primaryColor(BuildContext context) =>
-      Theme.of(context).brightness == Brightness.dark
-      ? AppColor.darkPrimary
-      : AppColor.primary;
-  Widget _buildNoteCard(Note note, int index) {
+  //============= WIDGET UI =================
+
+  Widget _buildHeader() {
+    //UNTUK TAMPILAN head
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Transform.scale(
+          scale: 1.5,
+          child: ColorFiltered(
+            colorFilter: ColorFilter.mode(
+              Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
+              BlendMode.srcIn,
+            ),
+            child: Lottie.asset(
+              //ANIMASI HI!
+              'lib/asset/animation/hi.json',
+              fit: BoxFit.contain,
+              width: 100,
+              height: 100,
+              repeat: false,
+            ),
+          ),
+        ),
+        Text(
+          'Catat idemu hari ini!',
+          style: GoogleFonts.inter(
+            fontSize: 16,
+            color: context.textColor.withValues(alpha: 0.7),
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        const SizedBox(height: 20),
+        Row(
+          //TGL & ICON TGL
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              _formatDate(_selectedDate),
+              style: GoogleFonts.manrope(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: context.textColor,
+              ),
+            ),
+            IconButton(
+              onPressed: _pickDate,
+              icon: const Icon(Icons.calendar_month),
+              color: context.textColor,
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        _buildDatePicker(), //TGL YG KOTAK"
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+
+  // CONTAINER BANNER SETELAH TGL KOTAK
+  Widget _buildHeroBanner() {
+    return Container(
+      height: 140,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: context.primaryColor,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Icon(Icons.sticky_note_2, size: 50, color: Colors.white),
+    );
+  }
+
+  //TEKS NOTES
+  Widget _buildNotesHeader() {
+    return Text(
+      'Notes',
+      style: GoogleFonts.manrope(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        color: context.textColor,
+      ),
+    );
+  }
+
+  //MEMBANGUN DAFTAR CATATAN
+  Widget _buildNotesList() {
+    return StreamBuilder<List<NoteEntry>>(
+      //widget ini akan otomatis menggambar ulang dirinya sendiri tanpa perlu memuat ulang seluruh halaman
+      stream:
+          _notesController //data yg di pantau
+              .allNotes,
+      builder: (context, snapshot) {
+        //snapshot berisi data terbaru beserta status koneksinya saat itu
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 30),
+              child: CircularProgressIndicator(
+                color: context.primaryColor,
+              ), //saat aplikasi pertama kali membaca data dari memori HP ke SQLite. sambil nunggu muncul animasi lingaran berputar
+            ),
+          );
+        }
+
+        // 2. Error State, kalau gagal memunculkan data
+        if (snapshot.hasError) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 30),
+              child: Text(
+                'Gagal memuat data: ${snapshot.error}',
+                style: TextStyle(color: Colors.red[300], fontSize: 14),
+              ),
+            ),
+          );
+        }
+
+        final notes =
+            snapshot.data ??
+            []; //mengambil data dari snapshot, ??[] : Jika data dari database ternyata kosong atau belum siap (null), kode akan otomatis menggunakan daftar kosong [] agar aplikasi tidak crash atau error
+
+        // 3. State Data Kosong, jika belum ada catatan
+        if (notes.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 30),
+              child: Text(
+                'Belum ada catatan',
+                style: TextStyle(color: context.mutedTextColor, fontSize: 16),
+              ),
+            ),
+          );
+        }
+
+        // 4. State Ada Data (Menampilkan List Catatan)
+        return ListView.builder(
+          shrinkWrap:
+              true, //dirancang agar bisa disisipkan di dalam halaman yang sudah memiliki kompenen gulir
+          physics:
+              const NeverScrollableScrollPhysics(), //saat jari pengguna menyentuh area catatan dan menggesernya ke atas, yang bergerak mulus adalah seluruh halaman mading besarnya.
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          itemCount: notes.length,
+          itemBuilder: (context, index) {
+            final note =
+                notes[index]; //sistem mengambil data satu catatan spesifik berdasarkan urutannya (index),
+            return _buildNoteCard(
+              note,
+            ); //lalu mengirimkan data tersebut ke fungsi/widget kustom bernama _buildNoteCard(note) untuk digambar menjadi bentuk kartu
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildNoteCard(NoteEntry note) {
     final priorityColor = PriorityHelper.getColor(note.priority);
     final priorityTextColor = PriorityHelper.getTextColor(note.priority);
     final priorityLabel = PriorityHelper.getLabel(note.priority);
 
     return GestureDetector(
-      onTap: () => _showNoteDetail(index),
+      onTap: () => _showNoteDetail(note),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: _cardColor(context),
+          color: context.cardColor,
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
@@ -210,6 +389,7 @@ class _NotesPageState extends State<NotesPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
+                    // garis warna priority
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
                       vertical: 3,
@@ -235,7 +415,7 @@ class _NotesPageState extends State<NotesPage> {
                     style: GoogleFonts.manrope(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: _textColor(context),
+                      color: context.textColor,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -245,7 +425,7 @@ class _NotesPageState extends State<NotesPage> {
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
                       fontSize: 13,
-                      color: _mutedColor(context),
+                      color: context.mutedTextColor,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -262,143 +442,10 @@ class _NotesPageState extends State<NotesPage> {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: _mutedColor(context)),
+            Icon(Icons.chevron_right_rounded, color: context.mutedTextColor),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Transform.scale(
-          scale: 1.5,
-          child: ColorFiltered(
-            colorFilter: ColorFilter.mode(
-              Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
-              BlendMode.srcIn,
-            ),
-            child: Lottie.asset(
-              'lib/asset/animation/hi.json',
-              fit: BoxFit.contain,
-              width: 100,
-              height: 100,
-              repeat: false,
-            ),
-          ),
-        ),
-        Text(
-          'Catat idemu hari ini!',
-          style: GoogleFonts.inter(
-            fontSize: 16,
-            color: _textColor(context).withValues(alpha: 0.7),
-            fontWeight: FontWeight.w400,
-          ),
-        ),
-        const SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              _formatDate(_selectedDate),
-              style: GoogleFonts.manrope(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: _textColor(context),
-              ),
-            ),
-            IconButton(
-              onPressed: _pickDate,
-              icon: const Icon(Icons.calendar_month),
-              color: _textColor(context),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        _buildDatePicker(),
-        const SizedBox(height: 20),
-      ],
-    );
-  }
-
-  // ============ MAIN BUILD ============
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _bgColor(context),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              _buildHeroBanner(),
-              const SizedBox(height: 20),
-              _buildNotesHeader(),
-              const SizedBox(height: 15),
-              _buildNotesList(),
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddNoteDialog,
-        backgroundColor: _primaryColor(context),
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: const Icon(Icons.add_rounded, color: Colors.white, size: 30),
-      ),
-    );
-  }
-
-  Widget _buildHeroBanner() {
-    return Container(
-      height: 140,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: _primaryColor(context),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Icon(Icons.sticky_note_2, size: 50, color: Colors.white),
-    );
-  }
-
-  Widget _buildNotesHeader() {
-    return Text(
-      'Notes',
-      style: GoogleFonts.manrope(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-        color: _textColor(context),
-      ),
-    );
-  }
-
-  Widget _buildNotesList() {
-    if (_notesController.notes.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 30),
-          child: Text(
-            'Belum ada catatan',
-            style: TextStyle(color: _mutedColor(context), fontSize: 16),
-          ),
-        ),
-      );
-    }
-
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: _notesController.notes.length,
-      itemBuilder: (context, index) {
-        return _buildNoteCard(_notesController.notes[index], index);
-      },
     );
   }
 }
@@ -407,7 +454,6 @@ class _NotesPageState extends State<NotesPage> {
 // SEPARATE DIALOG WIDGETS
 // ============================================================
 
-/// Dialog untuk menambah catatan baru
 class AddNoteDialog extends StatefulWidget {
   const AddNoteDialog({super.key});
 
@@ -443,6 +489,7 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
 
         if (title.isNotEmpty && content.isNotEmpty) {
           Navigator.pop(context, {
+            //ngirim data ke halaman utama
             'title': title,
             'content': content,
             'priority': _selectedPriority,
@@ -456,7 +503,7 @@ class _AddNoteDialogState extends State<AddNoteDialog> {
 
 /// Dialog untuk menampilkan detail catatan
 class NoteDetailDialog extends StatelessWidget {
-  final Note note;
+  final NoteEntry note;
   final VoidCallback onDelete;
   final Function(String, String, int) onEdit;
 
@@ -608,7 +655,7 @@ class NoteDetailDialog extends StatelessWidget {
 
 /// Dialog untuk mengedit catatan
 class EditNoteDialog extends StatefulWidget {
-  final Note note;
+  final NoteEntry note;
   final Function(String, String, int) onSave;
 
   const EditNoteDialog({super.key, required this.note, required this.onSave});
@@ -661,7 +708,7 @@ class _EditNoteDialogState extends State<EditNoteDialog> {
   }
 }
 
-/// Form dialog reusable untuk tambah dan edit catatan
+/// INI FORM UI ALERTDIALOG REUSABLE (ADD+EDIT)
 class NoteFormDialog extends StatefulWidget {
   final String dialogTitle;
   final TextEditingController titleController;

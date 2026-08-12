@@ -21,6 +21,7 @@ class Notes extends Table {
 class Todos extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get title => text().withLength(min: 6, max: 40)();
+  BoolColumn get isDone => boolean().withDefault(const Constant(false))();
 }
 
 @DriftDatabase(tables: [Notes, Todos])
@@ -29,6 +30,47 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   int get schemaVersion => 1;
+
+  // FUNGSI CRUD NOTES--------------------------------------------
+  // 1. READ
+  Stream<List<NoteEntry>> watchAllNotes() {
+    return select(notes).watch();
+  }
+
+  Future<int> insertNote(NotesCompanion note) {
+    return into(notes).insert(note);
+  }
+
+  //UPDATE
+  Future<bool> updateNote(NoteEntry note) {
+    return update(notes).replace(note);
+  }
+
+  //DELETE
+  Future<int> deleteNote(int id) {
+    return (delete(notes)..where((tbl) => tbl.id.equals(id))).go();
+  }
+
+  //FUNGSI CRUD TODOS------------------------------------------------
+  // 1. READ
+  Stream<List<Todo>> watchAllTodos() {
+    return select(todos).watch();
+  }
+
+  // 2. CREAD
+  Future<int> insertTodo(TodosCompanion todo) {
+    return into(todos).insert(todo);
+  }
+
+  // 3. EDIT
+  Future<bool> updateTodo(Todo todo) {
+    return update(todos).replace(todo);
+  }
+
+  // 4. DELETE
+  Future<int> deleteTodo(int id) {
+    return (delete(todos)..where((tbl) => tbl.id.equals(id))).go();
+  }
 }
 
 LazyDatabase _openConnection() {

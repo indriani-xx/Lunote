@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../Controller/todo_controller.dart';
+import '../../data/database/app_database.dart';
+import '../../controller/todo_controller.dart';
 import '../core/app_color.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
@@ -15,18 +16,21 @@ class TodoPage extends StatefulWidget {
 class _TodoPageState extends State<TodoPage> {
   final TodoController _todoController = TodoController();
   final TextEditingController _todoControllerInput = TextEditingController();
-  late DateTime selectedDate = DateTime.now();
+  DateTime selectedDate = DateTime.now();
 
   String _formatDate(DateTime date) {
     return DateFormat('EEEE, d MMM yyyy', 'id_ID').format(date);
-  }
+  } // aku makek format tgl indo jd makek ini
 
   @override
   void dispose() {
+    //digunakan untuk membersihkan memori dan mencegah kebocoran data (memory leak) di Flutter.
     _todoControllerInput.dispose();
-    super.dispose();
+    super.dispose(); //sistem pembersih bawaan flutter
   }
 
+  //=============== VOID =============
+  //FUNGSI MENAMBAH CATATAN
   void _showAddTodoDialog() {
     _todoControllerInput.clear();
     showDialog(
@@ -34,35 +38,33 @@ class _TodoPageState extends State<TodoPage> {
       builder: (context) => AlertDialog(
         title: Text(
           'Tambah Todo Baru',
-          style: TextStyle(color: _textColor(context)),
+          style: TextStyle(color: context.textColor),
         ),
-        backgroundColor: _bgColor(context),
+        backgroundColor: context.bgColor,
         content: TextField(
           controller: _todoControllerInput,
           decoration: InputDecoration(
             hintText: 'Masukkan tugas baru...',
             hintStyle: TextStyle(
-              color: _textColor(context).withValues(alpha: 0.5),
+              color: context.textColor.withValues(alpha: 0.5),
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: _primaryColor(context)),
+              borderSide: BorderSide(color: context.primaryColor),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: _primaryColor(context), width: 2),
+              borderSide: BorderSide(color: context.primaryColor, width: 2),
             ),
           ),
-          cursorColor: _primaryColor(context),
+          cursorColor: context.textColor,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
               'Batal',
-              style: TextStyle(
-                color: _textColor(context).withValues(alpha: 0.7),
-              ),
+              style: TextStyle(color: context.textColor.withValues(alpha: 0.7)),
             ),
           ),
           TextButton(
@@ -74,38 +76,21 @@ class _TodoPageState extends State<TodoPage> {
                 Navigator.pop(context);
               }
             },
-            child: Text(
-              'Tambah',
-              style: TextStyle(color: _primaryColor(context)),
-            ),
+            child: Text('Tambah', style: TextStyle(color: context.textColor)),
           ),
         ],
       ),
     );
   }
 
-  Color _bgColor(BuildContext context) =>
-      Theme.of(context).scaffoldBackgroundColor;
-  Color _textColor(BuildContext context) =>
-      Theme.of(context).brightness == Brightness.dark
-      ? AppColor.darkTextPrimary
-      : AppColor.text;
-  Color _primaryColor(BuildContext context) =>
-      Theme.of(context).brightness == Brightness.dark
-      ? AppColor.darkPrimary
-      : AppColor.primary;
-  Color _dateBgColor(BuildContext context) =>
-      Theme.of(context).brightness == Brightness.dark
-      ? AppColor.darkSurface
-      : const Color(0xFFE2E8E4);
-
+  //==================== BUILD MAIN ==========================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bgColor(context),
+      backgroundColor: context.bgColor,
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddTodoDialog,
-        backgroundColor: _primaryColor(context),
+        backgroundColor: context.primaryColor,
         elevation: 3,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: const Icon(Icons.add_rounded, color: Colors.white, size: 30),
@@ -137,7 +122,7 @@ class _TodoPageState extends State<TodoPage> {
                 'Punya rencana menarik?',
                 style: GoogleFonts.inter(
                   fontSize: 16,
-                  color: _textColor(context).withValues(alpha: 0.7),
+                  color: context.textColor.withValues(alpha: 0.7),
                 ),
               ),
 
@@ -152,13 +137,13 @@ class _TodoPageState extends State<TodoPage> {
                       style: GoogleFonts.manrope(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: _textColor(context),
+                        color: context.textColor,
                       ),
                     ),
                     IconButton(
                       onPressed: _pickdate,
                       icon: const Icon(Icons.calendar_month),
-                      color: _textColor(context),
+                      color: context.textColor,
                     ),
                   ],
                 ),
@@ -173,7 +158,7 @@ class _TodoPageState extends State<TodoPage> {
                 height: 140,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: _primaryColor(context),
+                  color: context.primaryColor,
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: Icon(
@@ -189,33 +174,35 @@ class _TodoPageState extends State<TodoPage> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: _textColor(context),
+                  color: context.textColor,
                 ),
               ),
               const SizedBox(height: 15),
 
               // Dynamic List of Todos
-              _todoController.todos.isEmpty
-                  ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 30),
-                        child: Text(
-                          'Belum ada todo. Buat yang baru!',
-                          style: TextStyle(
-                            color: _textColor(context).withValues(alpha: 0.5),
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    )
-                  : ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _todoController.todos.length,
-                      itemBuilder: (context, index) {
-                        return _buildTodoItem(index);
-                      },
-                    ),
+              StreamBuilder<List<Todo>>(
+                stream: _todoController.allTodos,
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return CircularProgressIndicator();
+                  }
+                  final todos = snapshot.data!;
+                  if (todos.isEmpty) {
+                    return Center(
+                      child: Text('Belum ada todo. Buat yang baru!'),
+                    );
+                  }
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: todos.length,
+                    itemBuilder: (context, index) {
+                      final todo = todos[index];
+                      return _buildTodoItem(todo);
+                    },
+                  );
+                },
+              ),
               const SizedBox(height: 100),
             ],
           ),
@@ -224,6 +211,81 @@ class _TodoPageState extends State<TodoPage> {
     );
   }
 
+  Widget _buildTodoItem(Todo todo) {
+    final primaryColor = context.primaryColor;
+    final textColor = context.textColor;
+    final dateBgColor = context.dateBgColor;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          // Checkbox Lingkaran
+          GestureDetector(
+            onTap: () {
+              _todoController.toggleTodoDone(todo);
+            },
+            child: Container(
+              width: 44,
+              height: 24,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: primaryColor, width: 2),
+                color: todo.isDone ? primaryColor : Colors.transparent,
+              ),
+              child: todo.isDone
+                  ? const Icon(Icons.check, size: 14, color: Colors.white)
+                  : null,
+            ),
+          ),
+          const SizedBox(width: 16),
+          // Kotak Isi Todo
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+              decoration: BoxDecoration(
+                color: dateBgColor,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                todo.title,
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 15,
+                  decoration: todo.isDone ? TextDecoration.lineThrough : null,
+                  decorationColor: textColor.withValues(alpha: 0.5),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Tombol Hapus
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _todoController.deleteTodo(todo.id);
+              });
+            },
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColor.delete.withValues(alpha: 0.1),
+              ),
+              child: Icon(
+                Icons.delete_outline,
+                color: AppColor.delete,
+                size: 18,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================ DATE =================
   List<DateTime> _getDateList() {
     List<DateTime> dates = [];
     for (int i = -2; i <= 2; i++) {
@@ -269,9 +331,9 @@ class _TodoPageState extends State<TodoPage> {
               'Sab',
               'Min',
             ][date.weekday - 1];
-            final primaryColor = _primaryColor(context);
-            final textColor = _textColor(context);
-            final dateBgColor = _dateBgColor(context);
+            final primaryColor = context.primaryColor;
+            final textColor = context.textColor;
+            final dateBgColor = context.dateBgColor;
 
             return Expanded(
               child: Padding(
@@ -332,80 +394,9 @@ class _TodoPageState extends State<TodoPage> {
   }
 
   // Widget untuk baris Todo-list
-  Widget _buildTodoItem(int index) {
-    final todo = _todoController.todos[index];
-    final primaryColor = _primaryColor(context);
-    final textColor = _textColor(context);
-    final dateBgColor = _dateBgColor(context);
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          // Checkbox Lingkaran
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _todoController.toggleTodoDone(index);
-              });
-            },
-            child: Container(
-              width: 44,
-              height: 24,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: primaryColor, width: 2),
-                color: todo.isDone ? primaryColor : Colors.transparent,
-              ),
-              child: todo.isDone
-                  ? const Icon(Icons.check, size: 14, color: Colors.white)
-                  : null,
-            ),
-          ),
-          const SizedBox(width: 16),
-          // Kotak Isi Todo
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-              decoration: BoxDecoration(
-                color: dateBgColor,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                todo.title,
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 15,
-                  decoration: todo.isDone ? TextDecoration.lineThrough : null,
-                  decorationColor: textColor.withValues(alpha: 0.5),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          // Tombol Hapus
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _todoController.deleteTodo(index);
-              });
-            },
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColor.delete.withValues(alpha: 0.1),
-              ),
-              child: Icon(
-                Icons.delete_outline,
-                color: AppColor.delete,
-                size: 18,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
+
+//=============
+//== CATATAN ==
+//=============
+//1. Hindari late Berlebihan: Kata kunci late digunakan jika nilai variabel baru ada nanti (misalnya di dalam initState). Jika langsung diisi DateTime.now(), tidak perlu pakai late.
