@@ -51,6 +51,7 @@ class AppColor {
   static const Color darkTextSecondary = Color(0xFF9AA4A0);
 }
 
+//LOGIKA MENCARI WARNA SESUAI TEMA
 extension AppColorTheme on BuildContext {
   Color get bgColor => Theme.of(this).scaffoldBackgroundColor;
 

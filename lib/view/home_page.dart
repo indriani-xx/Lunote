@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'pages/notes_page.dart';
 import 'pages/todo_list_page.dart';
 import 'core/app_color.dart';
-import '../../Controller/theme_controller.dart';
+import '../controller/theme_controller.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

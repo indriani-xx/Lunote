@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:indri_notes/view/widgets/date_picker_widget.dart';
 import '../../data/database/app_database.dart';
 import '../../controller/todo_controller.dart';
 import '../core/app_color.dart';
@@ -16,17 +17,46 @@ class TodoPage extends StatefulWidget {
 class _TodoPageState extends State<TodoPage> {
   final TodoController _todoController = TodoController();
   final TextEditingController _todoControllerInput = TextEditingController();
-  DateTime selectedDate = DateTime.now();
+  late DateTime selectedDate;
+  bool _showAllTodos = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Normalisasi ke midnight untuk konsistensi perbandingan tanggal
+    selectedDate = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
+  }
 
   String _formatDate(DateTime date) {
     return DateFormat('EEEE, d MMM yyyy', 'id_ID').format(date);
   } // aku makek format tgl indo jd makek ini
+
+  List<DateTime> _getDateRange() {
+    //ngambil tanggal -2 dari hari ini
+    return List.generate(
+      5,
+      (index) => selectedDate.add(Duration(days: index - 2)),
+    );
+  }
 
   @override
   void dispose() {
     //digunakan untuk membersihkan memori dan mencegah kebocoran data (memory leak) di Flutter.
     _todoControllerInput.dispose();
     super.dispose(); //sistem pembersih bawaan flutter
+  }
+
+  String _formatShortDate(DateTime date) {
+    //tgl format indo tanpa hari, untuk tampilan catatan list
+    return DateFormat('d MMM yyyy', 'id_ID').format(date);
+  }
+
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
   //=============== VOID =============
@@ -169,14 +199,7 @@ class _TodoPageState extends State<TodoPage> {
               ),
               const SizedBox(height: 20),
 
-              Text(
-                'Todo-list',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: context.textColor,
-                ),
-              ),
+              _buildTodosHeader(),
               const SizedBox(height: 15),
 
               // Dynamic List of Todos
@@ -184,20 +207,44 @@ class _TodoPageState extends State<TodoPage> {
                 stream: _todoController.allTodos,
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
-                    return CircularProgressIndicator();
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color: context.primaryColor,
+                      ),
+                    );
                   }
                   final todos = snapshot.data!;
-                  if (todos.isEmpty) {
+                  final filteredTodos = _showAllTodos
+                      ? todos
+                      : todos
+                            .where(
+                              (todo) =>
+                                  _isSameDay(todo.createdAt, selectedDate),
+                            )
+                            .toList();
+
+                  if (filteredTodos.isEmpty) {
                     return Center(
-                      child: Text('Belum ada todo. Buat yang baru!'),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 30),
+                        child: Text(
+                          _showAllTodos
+                              ? 'Belum ada todo. Buat yang baru!'
+                              : 'Belum ada todo di tanggal ini',
+                          style: TextStyle(
+                            color: context.mutedTextColor,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
                     );
                   }
                   return ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: todos.length,
+                    itemCount: filteredTodos.length,
                     itemBuilder: (context, index) {
-                      final todo = todos[index];
+                      final todo = filteredTodos[index];
                       return _buildTodoItem(todo);
                     },
                   );
@@ -238,7 +285,7 @@ class _TodoPageState extends State<TodoPage> {
                   : null,
             ),
           ),
-          const SizedBox(width: 16),
+
           // Kotak Isi Todo
           Expanded(
             child: Container(
@@ -247,14 +294,32 @@ class _TodoPageState extends State<TodoPage> {
                 color: dateBgColor,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Text(
-                todo.title,
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 15,
-                  decoration: todo.isDone ? TextDecoration.lineThrough : null,
-                  decorationColor: textColor.withValues(alpha: 0.5),
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    todo.title,
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 15,
+                      decoration: todo.isDone
+                          ? TextDecoration.lineThrough
+                          : null,
+                      decorationColor: textColor.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Text(
+                      _formatShortDate(todo.createdAt),
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -286,13 +351,6 @@ class _TodoPageState extends State<TodoPage> {
   }
 
   // ================ DATE =================
-  List<DateTime> _getDateList() {
-    List<DateTime> dates = [];
-    for (int i = -2; i <= 2; i++) {
-      dates.add(selectedDate.add(Duration(days: i)));
-    }
-    return dates;
-  }
 
   Future<void> _pickdate() async {
     final pickeddate = await showDatePicker(
@@ -305,91 +363,58 @@ class _TodoPageState extends State<TodoPage> {
 
     if (pickeddate != null) {
       setState(() {
-        selectedDate = pickeddate;
+        // Normalisasi ke midnight agar konsisten
+        selectedDate = DateTime(
+          pickeddate.year,
+          pickeddate.month,
+          pickeddate.day,
+        );
       });
     }
   }
 
   // DATE PICKER WIDGET
   Widget _buildDatePicker() {
-    final dates = _getDateList();
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Row(
-          children: dates.asMap().entries.map((entry) {
-            final index = entry.key;
-            final date = entry.value;
-            final isSelected =
-                date.day == selectedDate.day &&
-                date.month == selectedDate.month;
-            final dayName = [
-              'Sen',
-              'Sel',
-              'Rab',
-              'Kam',
-              'Jum',
-              'Sab',
-              'Min',
-            ][date.weekday - 1];
-            final primaryColor = context.primaryColor;
-            final textColor = context.textColor;
-            final dateBgColor = context.dateBgColor;
-
-            return Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(
-                  right: index < dates.length - 1 ? 8 : 0,
-                ),
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedDate = date;
-                    });
-                  },
-                  child: Container(
-                    height: 90,
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                    decoration: BoxDecoration(
-                      color: isSelected ? primaryColor : dateBgColor,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            dayName,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: isSelected
-                                  ? Colors.white
-                                  : textColor.withValues(alpha: 0.6),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            date.day.toString(),
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: isSelected ? Colors.white : textColor,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        );
+    final dates = _getDateRange();
+    return BoxDatePickerWidget(
+      selectedDate: selectedDate,
+      dates: dates,
+      onDateSelected: (date) {
+        setState(() {
+          selectedDate = date;
+          _showAllTodos = false;
+        });
       },
+    );
+  }
+
+  Widget _buildTodosHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Todo-list',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: context.textColor,
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            setState(() {
+              _showAllTodos = true;
+            });
+          },
+          child: Text(
+            'See all',
+            style: GoogleFonts.inter(
+              color: context.primaryColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

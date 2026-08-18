@@ -21,10 +21,10 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteEntry> {
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
-  static const VerificationMeta _judulMeta = const VerificationMeta('judul');
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
   @override
-  late final GeneratedColumn<String> judul = GeneratedColumn<String>(
-    'judul',
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -66,7 +66,7 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteEntry> {
   @override
   List<GeneratedColumn> get $columns => [
     id,
-    judul,
+    title,
     content,
     priority,
     createdAt,
@@ -86,13 +86,13 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteEntry> {
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    if (data.containsKey('judul')) {
+    if (data.containsKey('title')) {
       context.handle(
-        _judulMeta,
-        judul.isAcceptableOrUnknown(data['judul']!, _judulMeta),
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
       );
     } else if (isInserting) {
-      context.missing(_judulMeta);
+      context.missing(_titleMeta);
     }
     if (data.containsKey('content')) {
       context.handle(
@@ -131,9 +131,9 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteEntry> {
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
-      judul: attachedDatabase.typeMapping.read(
+      title: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}judul'],
+        data['${effectivePrefix}title'],
       )!,
       content: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -158,13 +158,13 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteEntry> {
 
 class NoteEntry extends DataClass implements Insertable<NoteEntry> {
   final int id;
-  final String judul;
+  final String title;
   final String content;
   final int priority;
   final DateTime createdAt;
   const NoteEntry({
     required this.id,
-    required this.judul,
+    required this.title,
     required this.content,
     required this.priority,
     required this.createdAt,
@@ -173,7 +173,7 @@ class NoteEntry extends DataClass implements Insertable<NoteEntry> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['judul'] = Variable<String>(judul);
+    map['title'] = Variable<String>(title);
     map['content'] = Variable<String>(content);
     map['priority'] = Variable<int>(priority);
     map['created_at'] = Variable<DateTime>(createdAt);
@@ -183,7 +183,7 @@ class NoteEntry extends DataClass implements Insertable<NoteEntry> {
   NotesCompanion toCompanion(bool nullToAbsent) {
     return NotesCompanion(
       id: Value(id),
-      judul: Value(judul),
+      title: Value(title),
       content: Value(content),
       priority: Value(priority),
       createdAt: Value(createdAt),
@@ -197,7 +197,7 @@ class NoteEntry extends DataClass implements Insertable<NoteEntry> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return NoteEntry(
       id: serializer.fromJson<int>(json['id']),
-      judul: serializer.fromJson<String>(json['judul']),
+      title: serializer.fromJson<String>(json['title']),
       content: serializer.fromJson<String>(json['content']),
       priority: serializer.fromJson<int>(json['priority']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -208,7 +208,7 @@ class NoteEntry extends DataClass implements Insertable<NoteEntry> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'judul': serializer.toJson<String>(judul),
+      'title': serializer.toJson<String>(title),
       'content': serializer.toJson<String>(content),
       'priority': serializer.toJson<int>(priority),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -217,13 +217,13 @@ class NoteEntry extends DataClass implements Insertable<NoteEntry> {
 
   NoteEntry copyWith({
     int? id,
-    String? judul,
+    String? title,
     String? content,
     int? priority,
     DateTime? createdAt,
   }) => NoteEntry(
     id: id ?? this.id,
-    judul: judul ?? this.judul,
+    title: title ?? this.title,
     content: content ?? this.content,
     priority: priority ?? this.priority,
     createdAt: createdAt ?? this.createdAt,
@@ -231,7 +231,7 @@ class NoteEntry extends DataClass implements Insertable<NoteEntry> {
   NoteEntry copyWithCompanion(NotesCompanion data) {
     return NoteEntry(
       id: data.id.present ? data.id.value : this.id,
-      judul: data.judul.present ? data.judul.value : this.judul,
+      title: data.title.present ? data.title.value : this.title,
       content: data.content.present ? data.content.value : this.content,
       priority: data.priority.present ? data.priority.value : this.priority,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -242,7 +242,7 @@ class NoteEntry extends DataClass implements Insertable<NoteEntry> {
   String toString() {
     return (StringBuffer('NoteEntry(')
           ..write('id: $id, ')
-          ..write('judul: $judul, ')
+          ..write('title: $title, ')
           ..write('content: $content, ')
           ..write('priority: $priority, ')
           ..write('createdAt: $createdAt')
@@ -251,13 +251,13 @@ class NoteEntry extends DataClass implements Insertable<NoteEntry> {
   }
 
   @override
-  int get hashCode => Object.hash(id, judul, content, priority, createdAt);
+  int get hashCode => Object.hash(id, title, content, priority, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is NoteEntry &&
           other.id == this.id &&
-          other.judul == this.judul &&
+          other.title == this.title &&
           other.content == this.content &&
           other.priority == this.priority &&
           other.createdAt == this.createdAt);
@@ -265,37 +265,37 @@ class NoteEntry extends DataClass implements Insertable<NoteEntry> {
 
 class NotesCompanion extends UpdateCompanion<NoteEntry> {
   final Value<int> id;
-  final Value<String> judul;
+  final Value<String> title;
   final Value<String> content;
   final Value<int> priority;
   final Value<DateTime> createdAt;
   const NotesCompanion({
     this.id = const Value.absent(),
-    this.judul = const Value.absent(),
+    this.title = const Value.absent(),
     this.content = const Value.absent(),
     this.priority = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   NotesCompanion.insert({
     this.id = const Value.absent(),
-    required String judul,
+    required String title,
     required String content,
     required int priority,
     required DateTime createdAt,
-  }) : judul = Value(judul),
+  }) : title = Value(title),
        content = Value(content),
        priority = Value(priority),
        createdAt = Value(createdAt);
   static Insertable<NoteEntry> custom({
     Expression<int>? id,
-    Expression<String>? judul,
+    Expression<String>? title,
     Expression<String>? content,
     Expression<int>? priority,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (judul != null) 'judul': judul,
+      if (title != null) 'title': title,
       if (content != null) 'content': content,
       if (priority != null) 'priority': priority,
       if (createdAt != null) 'created_at': createdAt,
@@ -304,14 +304,14 @@ class NotesCompanion extends UpdateCompanion<NoteEntry> {
 
   NotesCompanion copyWith({
     Value<int>? id,
-    Value<String>? judul,
+    Value<String>? title,
     Value<String>? content,
     Value<int>? priority,
     Value<DateTime>? createdAt,
   }) {
     return NotesCompanion(
       id: id ?? this.id,
-      judul: judul ?? this.judul,
+      title: title ?? this.title,
       content: content ?? this.content,
       priority: priority ?? this.priority,
       createdAt: createdAt ?? this.createdAt,
@@ -324,8 +324,8 @@ class NotesCompanion extends UpdateCompanion<NoteEntry> {
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
-    if (judul.present) {
-      map['judul'] = Variable<String>(judul.value);
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
     }
     if (content.present) {
       map['content'] = Variable<String>(content.value);
@@ -343,7 +343,7 @@ class NotesCompanion extends UpdateCompanion<NoteEntry> {
   String toString() {
     return (StringBuffer('NotesCompanion(')
           ..write('id: $id, ')
-          ..write('judul: $judul, ')
+          ..write('title: $title, ')
           ..write('content: $content, ')
           ..write('priority: $priority, ')
           ..write('createdAt: $createdAt')
@@ -376,10 +376,6 @@ class $TodosTable extends Todos with TableInfo<$TodosTable, Todo> {
     'title',
     aliasedName,
     false,
-    additionalChecks: GeneratedColumn.checkTextLength(
-      minTextLength: 6,
-      maxTextLength: 40,
-    ),
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
@@ -396,8 +392,20 @@ class $TodosTable extends Todos with TableInfo<$TodosTable, Todo> {
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, title, isDone];
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, title, isDone, createdAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -427,6 +435,12 @@ class $TodosTable extends Todos with TableInfo<$TodosTable, Todo> {
         isDone.isAcceptableOrUnknown(data['is_done']!, _isDoneMeta),
       );
     }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
     return context;
   }
 
@@ -448,6 +462,10 @@ class $TodosTable extends Todos with TableInfo<$TodosTable, Todo> {
         DriftSqlType.bool,
         data['${effectivePrefix}is_done'],
       )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
     );
   }
 
@@ -461,13 +479,20 @@ class Todo extends DataClass implements Insertable<Todo> {
   final int id;
   final String title;
   final bool isDone;
-  const Todo({required this.id, required this.title, required this.isDone});
+  final DateTime createdAt;
+  const Todo({
+    required this.id,
+    required this.title,
+    required this.isDone,
+    required this.createdAt,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['title'] = Variable<String>(title);
     map['is_done'] = Variable<bool>(isDone);
+    map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
 
@@ -476,6 +501,7 @@ class Todo extends DataClass implements Insertable<Todo> {
       id: Value(id),
       title: Value(title),
       isDone: Value(isDone),
+      createdAt: Value(createdAt),
     );
   }
 
@@ -488,6 +514,7 @@ class Todo extends DataClass implements Insertable<Todo> {
       id: serializer.fromJson<int>(json['id']),
       title: serializer.fromJson<String>(json['title']),
       isDone: serializer.fromJson<bool>(json['isDone']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
   @override
@@ -497,19 +524,23 @@ class Todo extends DataClass implements Insertable<Todo> {
       'id': serializer.toJson<int>(id),
       'title': serializer.toJson<String>(title),
       'isDone': serializer.toJson<bool>(isDone),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
 
-  Todo copyWith({int? id, String? title, bool? isDone}) => Todo(
-    id: id ?? this.id,
-    title: title ?? this.title,
-    isDone: isDone ?? this.isDone,
-  );
+  Todo copyWith({int? id, String? title, bool? isDone, DateTime? createdAt}) =>
+      Todo(
+        id: id ?? this.id,
+        title: title ?? this.title,
+        isDone: isDone ?? this.isDone,
+        createdAt: createdAt ?? this.createdAt,
+      );
   Todo copyWithCompanion(TodosCompanion data) {
     return Todo(
       id: data.id.present ? data.id.value : this.id,
       title: data.title.present ? data.title.value : this.title,
       isDone: data.isDone.present ? data.isDone.value : this.isDone,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
 
@@ -518,45 +549,52 @@ class Todo extends DataClass implements Insertable<Todo> {
     return (StringBuffer('Todo(')
           ..write('id: $id, ')
           ..write('title: $title, ')
-          ..write('isDone: $isDone')
+          ..write('isDone: $isDone, ')
+          ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, title, isDone);
+  int get hashCode => Object.hash(id, title, isDone, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Todo &&
           other.id == this.id &&
           other.title == this.title &&
-          other.isDone == this.isDone);
+          other.isDone == this.isDone &&
+          other.createdAt == this.createdAt);
 }
 
 class TodosCompanion extends UpdateCompanion<Todo> {
   final Value<int> id;
   final Value<String> title;
   final Value<bool> isDone;
+  final Value<DateTime> createdAt;
   const TodosCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
     this.isDone = const Value.absent(),
+    this.createdAt = const Value.absent(),
   });
   TodosCompanion.insert({
     this.id = const Value.absent(),
     required String title,
     this.isDone = const Value.absent(),
+    this.createdAt = const Value.absent(),
   }) : title = Value(title);
   static Insertable<Todo> custom({
     Expression<int>? id,
     Expression<String>? title,
     Expression<bool>? isDone,
+    Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (title != null) 'title': title,
       if (isDone != null) 'is_done': isDone,
+      if (createdAt != null) 'created_at': createdAt,
     });
   }
 
@@ -564,11 +602,13 @@ class TodosCompanion extends UpdateCompanion<Todo> {
     Value<int>? id,
     Value<String>? title,
     Value<bool>? isDone,
+    Value<DateTime>? createdAt,
   }) {
     return TodosCompanion(
       id: id ?? this.id,
       title: title ?? this.title,
       isDone: isDone ?? this.isDone,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 
@@ -584,6 +624,9 @@ class TodosCompanion extends UpdateCompanion<Todo> {
     if (isDone.present) {
       map['is_done'] = Variable<bool>(isDone.value);
     }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
     return map;
   }
 
@@ -592,7 +635,8 @@ class TodosCompanion extends UpdateCompanion<Todo> {
     return (StringBuffer('TodosCompanion(')
           ..write('id: $id, ')
           ..write('title: $title, ')
-          ..write('isDone: $isDone')
+          ..write('isDone: $isDone, ')
+          ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
@@ -613,7 +657,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 typedef $$NotesTableCreateCompanionBuilder =
     NotesCompanion Function({
       Value<int> id,
-      required String judul,
+      required String title,
       required String content,
       required int priority,
       required DateTime createdAt,
@@ -621,7 +665,7 @@ typedef $$NotesTableCreateCompanionBuilder =
 typedef $$NotesTableUpdateCompanionBuilder =
     NotesCompanion Function({
       Value<int> id,
-      Value<String> judul,
+      Value<String> title,
       Value<String> content,
       Value<int> priority,
       Value<DateTime> createdAt,
@@ -640,8 +684,8 @@ class $$NotesTableFilterComposer extends Composer<_$AppDatabase, $NotesTable> {
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get judul => $composableBuilder(
-    column: $table.judul,
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -675,8 +719,8 @@ class $$NotesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get judul => $composableBuilder(
-    column: $table.judul,
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -708,8 +752,8 @@ class $$NotesTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get judul =>
-      $composableBuilder(column: $table.judul, builder: (column) => column);
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
 
   GeneratedColumn<String> get content =>
       $composableBuilder(column: $table.content, builder: (column) => column);
@@ -750,13 +794,13 @@ class $$NotesTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                Value<String> judul = const Value.absent(),
+                Value<String> title = const Value.absent(),
                 Value<String> content = const Value.absent(),
                 Value<int> priority = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => NotesCompanion(
                 id: id,
-                judul: judul,
+                title: title,
                 content: content,
                 priority: priority,
                 createdAt: createdAt,
@@ -764,13 +808,13 @@ class $$NotesTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                required String judul,
+                required String title,
                 required String content,
                 required int priority,
                 required DateTime createdAt,
               }) => NotesCompanion.insert(
                 id: id,
-                judul: judul,
+                title: title,
                 content: content,
                 priority: priority,
                 createdAt: createdAt,
@@ -802,12 +846,14 @@ typedef $$TodosTableCreateCompanionBuilder =
       Value<int> id,
       required String title,
       Value<bool> isDone,
+      Value<DateTime> createdAt,
     });
 typedef $$TodosTableUpdateCompanionBuilder =
     TodosCompanion Function({
       Value<int> id,
       Value<String> title,
       Value<bool> isDone,
+      Value<DateTime> createdAt,
     });
 
 class $$TodosTableFilterComposer extends Composer<_$AppDatabase, $TodosTable> {
@@ -830,6 +876,11 @@ class $$TodosTableFilterComposer extends Composer<_$AppDatabase, $TodosTable> {
 
   ColumnFilters<bool> get isDone => $composableBuilder(
     column: $table.isDone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -857,6 +908,11 @@ class $$TodosTableOrderingComposer
     column: $table.isDone,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TodosTableAnnotationComposer
@@ -876,6 +932,9 @@ class $$TodosTableAnnotationComposer
 
   GeneratedColumn<bool> get isDone =>
       $composableBuilder(column: $table.isDone, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
 }
 
 class $$TodosTableTableManager
@@ -909,13 +968,25 @@ class $$TodosTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> title = const Value.absent(),
                 Value<bool> isDone = const Value.absent(),
-              }) => TodosCompanion(id: id, title: title, isDone: isDone),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => TodosCompanion(
+                id: id,
+                title: title,
+                isDone: isDone,
+                createdAt: createdAt,
+              ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String title,
                 Value<bool> isDone = const Value.absent(),
-              }) => TodosCompanion.insert(id: id, title: title, isDone: isDone),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => TodosCompanion.insert(
+                id: id,
+                title: title,
+                isDone: isDone,
+                createdAt: createdAt,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),

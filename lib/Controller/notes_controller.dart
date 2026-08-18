@@ -7,15 +7,15 @@ class NotesController {
   Stream<List<NoteEntry>> get allNotes => _db.watchAllNotes();
 
   Future<void> addNote({
-    required String judul,
+    required String title,
     required String content,
     required int priority,
   }) async {
-    if (judul.trim().isEmpty || content.trim().isEmpty) return;
+    if (title.trim().isEmpty || content.trim().isEmpty) return;
 
     final safePriority = priority.clamp(1, 3);
     final noteBaru = NotesCompanion.insert(
-      judul: judul.trim(),
+      title: title.trim(),
       content: content.trim(),
       priority: safePriority,
       createdAt: DateTime.now(),
@@ -29,14 +29,14 @@ class NotesController {
 
   Future<void> editNote({
     required NoteEntry oldNote,
-    required String newJudul,
+    required String newTitle,
     required String newContent,
     required int newPriority,
   }) async {
-    if (newJudul.trim().isEmpty || newContent.trim().isEmpty) return;
+    if (newTitle.trim().isEmpty || newContent.trim().isEmpty) return;
 
     final updatedNote = oldNote.copyWith(
-      judul: newJudul.trim(),
+      title: newTitle.trim(),
       content: newContent.trim(),
       priority: newPriority.clamp(1, 3),
     );
@@ -45,8 +45,12 @@ class NotesController {
   }
 
   void showNote(NoteEntry note) {
-    debugPrint('Judul: ${note.judul}');
+    debugPrint('Title: ${note.title}');
     debugPrint('Content: ${note.content}');
     debugPrint('Priority: ${note.priority}');
+  }
+
+  void dispose() {
+    _db.close();
   }
 }

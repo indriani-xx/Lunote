@@ -11,7 +11,7 @@ part 'app_database.g.dart';
 // TABEL UNTUK NOTES
 class Notes extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get judul => text()();
+  TextColumn get title => text()();
   TextColumn get content => text()();
   IntColumn get priority => integer()();
   DateTimeColumn get createdAt => dateTime()();
@@ -20,8 +20,9 @@ class Notes extends Table {
 //TABEL UNTUK TODOLIST
 class Todos extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get title => text().withLength(min: 6, max: 40)();
+  TextColumn get title => text()();
   BoolColumn get isDone => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
 @DriftDatabase(tables: [Notes, Todos])
@@ -29,7 +30,19 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) async {
+      await m.createAll();
+    },
+    onUpgrade: (m, from, to) async {
+      if (from == 1) {
+        await m.addColumn(todos, todos.createdAt);
+      }
+    },
+  );
 
   // FUNGSI CRUD NOTES--------------------------------------------
   // 1. READ

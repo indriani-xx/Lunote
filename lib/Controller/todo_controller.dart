@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import '../data/database/app_database.dart';
 
 class TodoController {
@@ -8,7 +9,10 @@ class TodoController {
   Future<void> addTodo(String title) async {
     if (title.trim().isEmpty) return;
 
-    final newTodo = TodosCompanion.insert(title: title.trim());
+    final newTodo = TodosCompanion.insert(
+      title: title.trim(),
+      createdAt: Value(DateTime.now()),
+    );
     await _db.insertTodo(newTodo);
   }
 
