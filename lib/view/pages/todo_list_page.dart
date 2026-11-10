@@ -18,7 +18,7 @@ class _TodoPageState extends State<TodoPage> {
   final TodoController _todoController = TodoController();
   final TextEditingController _todoControllerInput = TextEditingController();
   late DateTime selectedDate;
-  bool _showAllTodos = false;
+  bool _showAllTodos = true;
 
   @override
   void initState() {
@@ -369,6 +369,7 @@ class _TodoPageState extends State<TodoPage> {
           pickeddate.month,
           pickeddate.day,
         );
+        _showAllTodos = false;
       });
     }
   }
@@ -403,7 +404,7 @@ class _TodoPageState extends State<TodoPage> {
         TextButton(
           onPressed: () {
             setState(() {
-              _showAllTodos = true;
+              _showAllTodos = false;
             });
           },
           child: Text(

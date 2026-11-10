@@ -21,7 +21,7 @@ class NotesPage extends StatefulWidget {
 class _NotesPageState extends State<NotesPage> {
   final NotesController _notesController = NotesController();
   DateTime _selectedDate = DateTime.now();
-  bool _showAllNotes = false;
+  bool _showAllNotes = true;
 
   bool _isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
@@ -139,6 +139,7 @@ class _NotesPageState extends State<NotesPage> {
     if (pickedDate != null) {
       setState(() {
         _selectedDate = pickedDate;
+        _showAllNotes = false;
       });
     }
   }
