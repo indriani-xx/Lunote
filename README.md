@@ -51,12 +51,10 @@ mencatat ide, mengatur tugas, dan meningkatkan produktivitas sehari-hari ✨
  Git Clone             cd lunote            flutter pub get       flutter run
 
  ## 💖 Contributing & Support
- ```text
-     .-.   .-.
-    (   `-'   )          "Every small contribution makes
-     `-.   .-'            Lunote even more magical!"
-        `-'
-       /   \             Saran, perbaikan bug, atau ide baru
-      /     \            selalu diterima dengan hangat! 🌸✨
-     '-------'
+ ```
+    .-.   .-.
+   (   `-'   )          "Send me a small contribution❤️"
+    `-.   .-'      
+       `-'
 ```
+       
